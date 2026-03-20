@@ -25,6 +25,92 @@ class TestToolMouseAndKeyboard:
 
     @patch("control_mcp.tools.combined.time")
     @patch("control_mcp.tools.combined.pyautogui")
+    def test_drag_action(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {
+                    "action": "drag",
+                    "start_x": 10,
+                    "start_y": 10,
+                    "end_x": 100,
+                    "end_y": 100,
+                    "duration": 0.3,
+                },
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        mock_pyauto.mouseDown.assert_called_once()
+        mock_pyauto.mouseUp.assert_called_once()
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
+    def test_scroll_action(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {"action": "scroll", "clicks": 3, "x": 500, "y": 300},
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        mock_pyauto.scroll.assert_called_once_with(3, x=500, y=300)
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
+    def test_keyboard_actions(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {"action": "key_press", "keys": ["ctrl", "a"]},
+                {"action": "key_type", "text": "hello"},
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        mock_pyauto.hotkey.assert_called_once_with("ctrl", "a")
+        mock_pyauto.typewrite.assert_called_once()
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
+    def test_wait_action(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {"action": "wait", "seconds": 1.5},
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        mock_time.sleep.assert_called_with(1.5)
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
+    def test_mouse_down_up(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {"action": "mouse_down", "x": 100, "y": 100, "button": "left"},
+                {"action": "move", "x": 500, "y": 500},
+                {"action": "mouse_up", "x": 500, "y": 500, "button": "left"},
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        assert mock_pyauto.mouseDown.call_count == 1
+        assert mock_pyauto.mouseUp.call_count == 1
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
+    def test_key_hold_action(self, mock_pyauto, mock_time):
+        result = tool_mouse_and_keyboard(
+            actions=[
+                {"action": "key_hold", "keys": ["shift"], "hold_seconds": 1.0},
+            ]
+        )
+        data = json.loads(result)
+        assert data["success"] is True
+        mock_pyauto.keyDown.assert_called_once_with("shift")
+        mock_pyauto.keyUp.assert_called_once_with("shift")
+
+    @patch("control_mcp.tools.combined.time")
+    @patch("control_mcp.tools.combined.pyautogui")
     def test_unknown_action(self, mock_pyauto, mock_time):
         result = tool_mouse_and_keyboard(
             actions=[
@@ -60,7 +146,6 @@ class TestToolMouseAndKeyboard:
         )
         data = json.loads(result)
         assert data["success"] is True
-        # delay should cause a time.sleep call
         mock_time.sleep.assert_called()
 
     @patch("control_mcp.tools.combined.time")
