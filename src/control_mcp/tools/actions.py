@@ -6,6 +6,7 @@ import json
 import platform
 import subprocess
 import time
+import webbrowser
 
 import pyautogui
 
@@ -94,8 +95,6 @@ def tool_launch_url(url: str) -> str:
         The URL to open.
     """
     try:
-        import webbrowser
-
         webbrowser.open(url)
         return OperationResult(success=True, message=f"Opened URL: {url}").to_json()
     except Exception as e:
