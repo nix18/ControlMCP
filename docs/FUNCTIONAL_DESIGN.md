@@ -14,12 +14,14 @@ LLM decides to use a tool
   → LLM receives and parses the JSON
 ```
 
+---
+
 ## 2. Response Format Convention
 
 Every tool returns a JSON object. Common fields:
 
 | Field | Type | Description |
-|-------|------|-------------|
+|---|---|---|
 | `success` | bool | Whether the operation succeeded |
 | `message` | str | Human-readable description or error |
 | `file_path` | str | Path to saved screenshot (capture tools) |
@@ -42,14 +44,17 @@ Every tool returns a JSON object. Common fields:
 {"success": false, "x": 500, "y": 300, "clicks": 1, "button": "left", "message": "pyautogui.FailSafeException: ..."}
 ```
 
+---
+
 ## 3. Screenshot Filename Convention
 
 Format: `{prefix}_{timestamp}_{WxH}_{x}_{y}.{ext}`
 
-Examples:
 - `screen_20260320_143022_123456_1920x1080_0_0.png` — full screen
 - `region_20260320_143022_123456_800x600_100_200.png` — region at (100,200), 800x600
 - `window_20260320_143022_123456_1024x768_50_80.png` — window at (50,80), 1024x768
+
+---
 
 ## 4. Combined Action Schema
 
@@ -108,16 +113,20 @@ Every action accepts an optional `"delay"` field (seconds to wait AFTER the step
 {"action": "click", "x": 500, "y": 300, "delay": 0.5}  # wait 0.5s after clicking
 ```
 
+---
+
 ## 5. Key Sequence Schema
 
 The `key_sequence` tool accepts a similar list but keyboard-focused:
 
 ```python
-{"action": "press", "keys": ["ctrl", "a"], "delay": 0.2}
-{"action": "type", "text": "Hello", "interval": 0.05, "delay": 0.1}
-{"action": "hold", "keys": ["shift"], "hold_seconds": 1.0, "delay": 0}
-{"action": "press", "keys": ["enter"], "delay": 0}
+{"action": "press", "keys": ["ctrl", "a"], "delay": 0.2}         # Press Ctrl+A
+{"action": "type", "text": "Hello", "interval": 0.05, "delay": 0.1}  # Type "Hello"
+{"action": "hold", "keys": ["shift"], "hold_seconds": 1.0, "delay": 0}  # Hold Shift
+{"action": "press", "keys": ["enter"], "delay": 0}               # Press Enter
 ```
+
+---
 
 ## 6. Error Handling Flow
 
@@ -135,6 +144,8 @@ For combined actions:
 - Failed steps are recorded but don't abort the sequence
 - The overall `success` field is `True` only if ALL steps succeeded
 
+---
+
 ## 7. Platform Detection
 
 ```python
@@ -148,6 +159,8 @@ Used in:
 - `server.py`: Windows event loop policy
 - `actions.py`: `launch_app()` platform-specific commands
 
+---
+
 ## 8. MCP Server Lifecycle
 
 ```
@@ -160,6 +173,8 @@ main()
   → [exits when stdin closes]
 ```
 
+---
+
 ## 9. Tool Registration
 
 Tools are defined as `Tool` objects with:
@@ -169,6 +184,8 @@ Tools are defined as `Tool` objects with:
 
 The `@server.list_tools()` handler returns the list.
 The `@server.call_tool()` handler dispatches by name.
+
+---
 
 ## 10. Extensibility
 

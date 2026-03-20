@@ -1,31 +1,31 @@
-# Tutorial & Examples
+# 教程与示例
 
-This tutorial shows how to use ControlMCP tools — both individually and in combination — to automate computer operations through an LLM.
+本教程展示如何使用 ControlMCP 工具——单独使用或组合使用——通过 LLM 自动化计算机操作。
 
-## Table of Contents
+## 目录
 
-1. [Screen Capture](#1-screen-capture)
-2. [Window Management](#2-window-management)
-3. [Mouse Control](#3-mouse-control)
-4. [Keyboard Control](#4-keyboard-control)
-5. [Combined Operations](#5-combined-operations)
-6. [Additional Actions](#6-additional-actions)
-7. [Real-World Patterns](#7-real-world-patterns)
+1. [屏幕截图](#1-屏幕截图)
+2. [窗口管理](#2-窗口管理)
+3. [鼠标控制](#3-鼠标控制)
+4. [键盘控制](#4-键盘控制)
+5. [组合操作](#5-组合操作)
+6. [附加操作](#6-附加操作)
+7. [实际场景模式](#7-实际场景模式)
 
 ---
 
-## 1. Screen Capture
+## 1. 屏幕截图
 
-### Take a full-screen screenshot
+### 全屏截图
 
-Captures the entire screen and saves it to a file.
+捕获整个屏幕并保存为文件。
 
 ```
 tool: capture_screen
 args: {}
 ```
 
-**Response:**
+**响应:**
 ```json
 {
   "file_path": "/tmp/control_mcp_screenshots/screen_20260320_143022_123456_1920x1080_0_0.png",
@@ -38,27 +38,27 @@ args: {}
 }
 ```
 
-### Capture a specific region
+### 截取指定区域
 
-Captures a rectangular region at the specified coordinates.
+截取指定坐标处的矩形区域。
 
 ```
 tool: capture_region
 args: {"x": 100, "y": 200, "width": 800, "height": 600}
 ```
 
-### Capture second monitor
+### 截取第二个显示器
 
-Captures a specific monitor by index and saves to a custom directory.
+按索引截取指定显示器，并保存到自定义目录。
 
 ```
 tool: capture_screen
 args: {"monitor": 2, "save_dir": "C:/screenshots"}
 ```
 
-### Get monitor info
+### 获取显示器信息
 
-Returns information about all connected monitors.
+返回所有已连接显示器的信息。
 
 ```
 tool: get_screen_info
@@ -67,106 +67,106 @@ args: {}
 
 ---
 
-## 2. Window Management
+## 2. 窗口管理
 
-### List all windows
+### 列出所有窗口
 
-Returns a list of all visible windows with their titles and positions.
+返回所有可见窗口的列表及其标题和位置。
 
 ```
 tool: list_windows
 args: {}
 ```
 
-### Find Chrome windows
+### 查找 Chrome 窗口
 
-Finds windows whose title contains the specified string (case-insensitive).
+查找标题包含指定字符串的窗口（不区分大小写）。
 
 ```
 tool: find_windows
 args: {"title_contains": "chrome"}
 ```
 
-### Focus and screenshot a window
+### 聚焦并截取窗口
 
-Finds a window, brings it to the foreground, and takes a screenshot of it.
+查找窗口、将其置为前台，并截取其截图。
 
 ```
 tool: capture_window
 args: {"title": "Notepad", "save_dir": "C:/screenshots"}
 ```
 
-This will:
-1. Find the window with "Notepad" in its title
-2. Bring it to the foreground
-3. Take a screenshot of just that window
-4. Return the file path, window position, and dimensions
+这将：
+1. 查找标题中包含 "Notepad" 的窗口
+2. 将其置于前台
+3. 仅截取该窗口的截图
+4. 返回文件路径、窗口位置和尺寸
 
 ---
 
-## 3. Mouse Control
+## 3. 鼠标控制
 
-### Single click
+### 单击
 
 ```
 tool: mouse_click
 args: {"x": 500, "y": 300}
 ```
 
-### Double-click
+### 双击
 
 ```
 tool: mouse_click
 args: {"x": 500, "y": 300, "clicks": 2}
 ```
 
-### Right-click
+### 右键点击
 
 ```
 tool: mouse_click
 args: {"x": 500, "y": 300, "button": "right"}
 ```
 
-### Long-press (hold for 3 seconds)
+### 长按（按住 3 秒）
 
-Presses and holds the mouse button at the specified coordinates for the given duration.
+在指定坐标处按下并按住鼠标按钮指定时长。
 
 ```
 tool: mouse_click
 args: {"x": 500, "y": 300, "hold_seconds": 3.0}
 ```
 
-### Drag from one point to another
+### 从一点拖拽到另一点
 
 ```
 tool: mouse_drag
 args: {"start_x": 100, "start_y": 100, "end_x": 800, "end_y": 600, "duration": 0.5}
 ```
 
-### Move cursor
+### 移动光标
 
-Moves the cursor to the specified position without clicking.
+将光标移动到指定位置，不点击。
 
 ```
 tool: mouse_move
 args: {"x": 960, "y": 540, "duration": 0.25}
 ```
 
-### Get current position
+### 获取当前位置
 
 ```
 tool: mouse_position
 args: {}
 ```
 
-### Scroll down
+### 向下滚动
 
 ```
 tool: mouse_scroll
 args: {"clicks": -5}
 ```
 
-### Scroll up at specific position
+### 在指定位置向上滚动
 
 ```
 tool: mouse_scroll
@@ -175,50 +175,50 @@ args: {"clicks": 3, "x": 500, "y": 300}
 
 ---
 
-## 4. Keyboard Control
+## 4. 键盘控制
 
-### Press Enter
+### 按下 Enter 键
 
 ```
 tool: key_press
 args: {"keys": ["enter"]}
 ```
 
-### Press Ctrl+C (copy)
+### 按下 Ctrl+C（复制）
 
 ```
 tool: key_press
 args: {"keys": ["ctrl", "c"]}
 ```
 
-### Press Alt+Tab 3 times
+### 按下 Alt+Tab 3 次
 
-Presses a key combination multiple times with an interval between presses.
+以指定间隔多次按下键组合。
 
 ```
 tool: key_press
 args: {"keys": ["alt", "tab"], "presses": 3, "interval": 0.5}
 ```
 
-### Hold Shift for 2 seconds
+### 按住 Shift 键 2 秒
 
 ```
 tool: key_hold
 args: {"keys": ["shift"], "hold_seconds": 2.0}
 ```
 
-### Type text
+### 输入文本
 
-Types text character by character with configurable interval.
+逐字符输入文本，间隔可配置。
 
 ```
 tool: key_type
 args: {"text": "Hello, World!", "interval": 0.05}
 ```
 
-### Execute a key sequence
+### 执行按键序列
 
-Executes a sequence of keyboard actions with delays between steps.
+执行键盘操作序列，步骤之间有延迟。
 
 ```
 tool: key_sequence
@@ -233,13 +233,13 @@ args: {
 
 ---
 
-## 5. Combined Operations
+## 5. 组合操作
 
-The `mouse_and_keyboard` tool lets you chain mouse and keyboard actions:
+`mouse_and_keyboard` 工具允许你串联鼠标和键盘操作：
 
-### Open a file in Notepad and type
+### 打开记事本并输入
 
-Opens Notepad via Win key search, waits for it to load, then types text.
+通过 Win 键搜索打开记事本，等待加载后输入文本。
 
 ```
 tool: mouse_and_keyboard
@@ -255,7 +255,7 @@ args: {
 }
 ```
 
-### Select all text and replace it
+### 全选文本并替换
 
 ```
 tool: mouse_and_keyboard
@@ -267,9 +267,9 @@ args: {
 }
 ```
 
-### Click a button, wait, then take a screenshot
+### 点击按钮、等待、然后截图
 
-Clicks at coordinates, waits for the result to load, then captures the screen.
+在坐标处点击，等待结果加载，然后截取屏幕。
 
 ```
 tool: mouse_and_keyboard
@@ -281,9 +281,9 @@ args: {
 }
 ```
 
-### Drag a slider
+### 拖拽滑块
 
-Clicks and holds at the start position, moves to the end position, then releases.
+在起始位置点击并按住，移动到终止位置，然后释放。
 
 ```
 tool: mouse_and_keyboard
@@ -297,9 +297,9 @@ args: {
 }
 ```
 
-### Complex form filling
+### 复杂表单填写
 
-Clicks a field, types data, tabs to the next field, and repeats. Finally clicks submit and takes a screenshot.
+点击字段、输入数据、Tab 到下一个字段并重复。最后点击提交并截图。
 
 ```
 tool: mouse_and_keyboard
@@ -319,29 +319,28 @@ args: {
 
 ---
 
-## 6. Additional Actions
+## 6. 附加操作
 
-### Get clipboard content
+### 获取剪贴板内容
 
 ```
 tool: clipboard_get
 args: {}
 ```
 
-### Set clipboard and paste
+### 设置剪贴板并粘贴
 
-Sets the clipboard text, then use `key_press` with `["ctrl", "v"]` to paste.
+设置剪贴板文本，然后使用 `key_press` 传入 `["ctrl", "v"]` 进行粘贴。
 
 ```
 tool: clipboard_set
 args: {"text": "Hello from clipboard!"}
 ```
+然后使用 `key_press` 传入 `["ctrl", "v"]` 粘贴。
 
-Then use `key_press` with `["ctrl", "v"]` to paste.
+### 启动应用程序
 
-### Launch an app
-
-Launches an application by name or path. Commands vary by platform.
+通过名称或路径启动应用程序。命令因平台而异。
 
 ```
 tool: launch_app
@@ -350,51 +349,51 @@ tool: launch_app
 args: {"command": "TextEdit"}  # macOS
 ```
 
-### Open a URL
+### 打开 URL
 
 ```
 tool: launch_url
 args: {"url": "https://example.com"}
 ```
 
-### Get pixel color
+### 获取像素颜色
 
-Returns the RGB color of the pixel at the specified coordinates.
+返回指定坐标处像素的 RGB 颜色。
 
 ```
 tool: get_pixel_color
 args: {"x": 500, "y": 300}
 ```
 
-Response: `{"x": 500, "y": 300, "r": 255, "g": 128, "b": 0, "hex": "#ff8000"}`
+响应: `{"x": 500, "y": 300, "r": 255, "g": 128, "b": 0, "hex": "#ff8000"}`
 
-### Wait
+### 等待
 
-Pauses execution for the specified number of seconds.
+暂停执行指定秒数。
 
 ```
 tool: wait
 args: {"seconds": 2.5}
 ```
 
-### Hotkey shortcut
+### 快捷键
 
-Convenience wrapper for pressing hotkey combinations.
+按下快捷键组合的便捷封装。
 
 ```
 tool: hotkey
-args: {"keys": ["ctrl", "shift", "s"]}  # Save As
+args: {"keys": ["ctrl", "shift", "s"]}  # 另存为
 ```
 
 ---
 
-## 7. Real-World Patterns
+## 7. 实际场景模式
 
-### Pattern: Screenshot -> Analyze -> Click
+### 模式：截图→分析→点击
 
-1. Take a screenshot
-2. LLM analyzes the image
-3. Click on the identified element
+1. 截图
+2. LLM 分析图像
+3. 点击识别出的元素
 
 ```
 # Step 1
@@ -406,11 +405,11 @@ tool: capture_screen → returns file_path
 tool: mouse_click → {"x": identified_x, "y": identified_y}
 ```
 
-### Pattern: Window workflow
+### 模式：窗口工作流
 
-1. Find and focus a window
-2. Take a screenshot of it
-3. Perform actions in that window
+1. 查找并聚焦窗口
+2. 截取该窗口的截图
+3. 在该窗口中执行操作
 
 ```
 tool: find_windows → {"title_contains": "VS Code"}
@@ -420,23 +419,23 @@ tool: key_type → {"text": "Format Document"}
 tool: key_press → {"keys": ["enter"]}
 ```
 
-### Pattern: Repeat-action loop
+### 模式：重复操作循环
 
-Use `mouse_and_keyboard` with a sequence that includes clicking a "next" button:
+使用 `mouse_and_keyboard` 配合包含点击"下一步"按钮的序列：
 
 ```
 tool: mouse_and_keyboard → {
   "actions": [
     {"action": "click", "x": 500, "y": 300, "delay": 0.5},
     {"action": "key_press", "keys": ["ctrl", "c"], "delay": 0.2},
-    {"action": "click", "x": 900, "y": 500, "delay": 0.5}  # next button
+    {"action": "click", "x": 900, "y": 500, "delay": 0.5}  # 下一步按钮
   ]
 }
 ```
 
-### Pattern: Wait for element then interact
+### 模式：等待元素出现后交互
 
-Wait for a page or element to load, capture the screen, verify it appeared, then interact.
+等待页面或元素加载，截屏，确认其出现后进行交互。
 
 ```
 tool: wait → {"seconds": 3.0}
@@ -447,11 +446,11 @@ tool: mouse_click → {"x": element_x, "y": element_y}
 
 ---
 
-## Key Names Reference
+## 按键名称参考
 
-Common key names (pyautogui convention):
+常用按键名称（pyautogui 约定）:
 
-| Key | Name |
+| 按键 | 名称 |
 |---|---|
 | Enter | `enter` / `return` |
 | Tab | `tab` |
@@ -459,11 +458,11 @@ Common key names (pyautogui convention):
 | Backspace | `backspace` |
 | Delete | `delete` |
 | Space | `space` |
-| Arrow keys | `up`, `down`, `left`, `right` |
-| Function keys | `f1` through `f15` |
-| Modifiers | `ctrl`, `alt`, `shift`, `win` (Windows) / `command` (Mac) |
+| 方向键 | `up`, `down`, `left`, `right` |
+| 功能键 | `f1` through `f15` |
+| 修饰键 | `ctrl`, `alt`, `shift`, `win` (Windows) / `command` (Mac) |
 | Home/End | `home`, `end` |
 | Page Up/Down | `pageup`, `pagedown` |
-| Print Screen | `printscreen` |
+| 截屏键 | `printscreen` |
 
-For a full list, see [pyautogui documentation](https://pyautogui.readthedocs.io/en/latest/keyboard.html).
+完整列表请参阅 [pyautogui 文档](https://pyautogui.readthedocs.io/en/latest/keyboard.html)。

@@ -5,6 +5,10 @@
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+**[中文文档](README.zh-CN.md)**
+
+---
+
 ## Overview
 
 ControlMCP is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that gives LLMs the ability to **see and control a computer** — take screenshots, manage windows, move/click the mouse, type on the keyboard, and chain all of these into complex automation workflows.
@@ -111,58 +115,83 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 
 See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 
+```json
+// Take a screenshot
+{"tool": "capture_screen", "args": {}}
+
+// Click at (500, 300)
+{"tool": "mouse_click", "args": {"x": 500, "y": 300}}
+
+// Combined: click → select all → type
+{"tool": "mouse_and_keyboard", "args": {"actions": [
+    {"action": "click", "x": 500, "y": 300},
+    {"action": "key_press", "keys": ["ctrl", "a"]},
+    {"action": "key_type", "text": "New text"}
+]}}
+```
+
 ## Documentation
 
-- [Requirements Analysis](docs/REQUIREMENTS.md)
-- [Architecture Design](docs/ARCHITECTURE.md)
-- [Module Design](docs/MODULE_DESIGN.md)
-- [Functional Design](docs/FUNCTIONAL_DESIGN.md)
-- [Tutorial & Examples](docs/TUTORIAL.md)
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | This file |
+| [README.zh-CN.md](README.zh-CN.md) | Chinese version of this file |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Requirements analysis |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture design |
+| [docs/MODULE_DESIGN.md](docs/MODULE_DESIGN.md) | Module design |
+| [docs/FUNCTIONAL_DESIGN.md](docs/FUNCTIONAL_DESIGN.md) | Functional design |
+| [docs/TUTORIAL.md](docs/TUTORIAL.md) | Tutorial & examples |
 
 ## Project Structure
 
 ```
 ControlMCP/
-├── README.md
-├── LICENSE
-├── pyproject.toml
+├── README.md                          # This file
+├── README.zh-CN.md                    # Chinese README
+├── LICENSE                            # MIT License
+├── pyproject.toml                     # Package config
 ├── src/
 │   └── control_mcp/
 │       ├── __init__.py
-│       ├── server.py            # MCP server + tool registration
+│       ├── server.py                  # MCP server + tool registration
 │       ├── schemas/
 │       │   ├── __init__.py
-│       │   └── responses.py     # Structured response types
+│       │   └── responses.py           # Structured response types
 │       ├── tools/
 │       │   ├── __init__.py
-│       │   ├── screen.py        # Screen capture tools
-│       │   ├── window.py        # Window management tools
-│       │   ├── mouse.py         # Mouse control tools
-│       │   ├── keyboard.py      # Keyboard control tools
-│       │   ├── combined.py      # Combined operations
-│       │   └── actions.py       # Additional actions
+│       │   ├── screen.py              # Screen capture tools
+│       │   ├── window.py              # Window management tools
+│       │   ├── mouse.py               # Mouse control tools
+│       │   ├── keyboard.py            # Keyboard control tools
+│       │   ├── combined.py            # Combined operations
+│       │   └── actions.py             # Additional actions
 │       └── utils/
 │           ├── __init__.py
-│           ├── capture.py       # Capture utilities
-│           ├── _win_window.py   # Windows backend
-│           ├── _mac_window.py   # macOS backend
-│           └── _linux_window.py # Linux backend
+│           ├── capture.py             # Capture utilities
+│           ├── _win_window.py         # Windows backend
+│           ├── _mac_window.py         # macOS backend
+│           └── _linux_window.py       # Linux backend
 ├── docs/
 │   ├── REQUIREMENTS.md
 │   ├── ARCHITECTURE.md
 │   ├── MODULE_DESIGN.md
 │   ├── FUNCTIONAL_DESIGN.md
-│   └── TUTORIAL.md
+│   ├── TUTORIAL.md
+│   └── zh-CN/                        # Chinese documentation
+│       ├── REQUIREMENTS.md
+│       ├── ARCHITECTURE.md
+│       ├── MODULE_DESIGN.md
+│       ├── FUNCTIONAL_DESIGN.md
+│       └── TUTORIAL.md
 └── tests/
     ├── __init__.py
-    ├── test_schemas.py
-    ├── test_screen.py
-    ├── test_window.py
-    ├── test_mouse.py
-    ├── test_keyboard.py
-    ├── test_combined.py
-    ├── test_actions.py
-    └── test_server.py
+    ├── test_schemas.py                # 22 tests
+    ├── test_screen.py                 # 6 tests
+    ├── test_window.py                 # 11 tests
+    ├── test_mouse.py                  # 13 tests
+    ├── test_keyboard.py               # 16 tests
+    ├── test_combined.py               # 12 tests
+    └── test_actions.py                # 13 tests
 ```
 
 ## Platform Support

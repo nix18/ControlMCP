@@ -1,16 +1,16 @@
-# Module Design
+# 模块设计
 
 ## 1. `schemas/responses.py`
 
-### Purpose
+### 用途
 
-Define all structured response types returned by tool functions.
+定义所有工具函数返回的结构化响应类型。
 
-### Types
+### 类型
 
-| Class | Fields | Used By |
+| 类 | 字段 | 使用者 |
 |---|---|---|
-| `OperationResult` | success, message, details | Generic operations |
+| `OperationResult` | success, message, details | 通用操作 |
 | `ScreenshotResult` | file_path, timestamp, width, height, x, y, monitor_index | capture_screen, capture_region |
 | `WindowScreenshotResult` | file_path, timestamp, window_title, window_x/y/width/height, screenshot_width/height | capture_window |
 | `WindowInfo` | title, x, y, width, height, is_visible, is_minimized, process_name | list_windows |
@@ -24,47 +24,47 @@ Define all structured response types returned by tool functions.
 | `ClipboardResult` | success, content, action, message | clipboard_get, clipboard_set |
 | `CompositeActionResult` | success, steps_completed, total_steps, results, message | mouse_and_keyboard, key_sequence |
 
-### Helpers
+### 辅助函数
 
-- `make_screenshot_filename(prefix, region, extension)` — generates a descriptive filename
+- `make_screenshot_filename(prefix, region, extension)` → 生成描述性文件名
 
 ---
 
 ## 2. `utils/capture.py`
 
-### Purpose
+### 用途
 
-Platform-agnostic screen and window capture.
+跨平台的屏幕和窗口捕获。
 
-### Functions
+### 函数
 
-| Function | Signature | Returns |
+| 函数 | 签名 | 返回值 |
 |---|---|---|
-| `capture_full_screen` | `(save_dir, monitor_index) → ScreenshotResult` | Full screen screenshot |
-| `capture_region` | `(x, y, width, height, save_dir) → ScreenshotResult` | Region screenshot |
-| `get_monitors` | `() → list[MonitorInfo]` | Monitor info list |
-| `list_windows` | `() → list[dict]` | Window list (delegates to platform backend) |
-| `find_windows` | `(title_contains) → list[dict]` | Filtered window list |
-| `focus_window` | `(title) → bool` | Focus success |
-| `capture_window` | `(title, save_dir) → WindowScreenshotResult` | Window screenshot |
+| `capture_full_screen` | `(save_dir, monitor_index) → ScreenshotResult` | 全屏截图 |
+| `capture_region` | `(x, y, width, height, save_dir) → ScreenshotResult` | 区域截图 |
+| `get_monitors` | `() → list[MonitorInfo]` | 显示器信息列表 |
+| `list_windows` | `() → list[dict]` | 窗口列表（委托给平台后端） |
+| `find_windows` | `(title_contains) → list[dict]` | 过滤后的窗口列表 |
+| `focus_window` | `(title) → bool` | 聚焦是否成功 |
+| `capture_window` | `(title, save_dir) → WindowScreenshotResult` | 窗口截图 |
 
-### Dependencies
+### 依赖
 
-- `mss` for screen capture
-- `Pillow` for image saving
-- Platform backends for window operations
+- `mss` 用于屏幕捕获
+- `Pillow` 用于图像保存
+- 平台后端用于窗口操作
 
 ---
 
 ## 3. `utils/_win_window.py`
 
-### Purpose
+### 用途
 
-Windows-specific window operations.
+Windows 平台特定的窗口操作。
 
-### Functions
+### 函数
 
-- `list_windows()` → list[dict] (via pygetwindow)
+- `list_windows()` → list[dict]（通过 pygetwindow）
 - `focus_window(title)` → bool
 - `find_and_get_geometry(title)` → dict | None
 
@@ -72,37 +72,37 @@ Windows-specific window operations.
 
 ## 4. `utils/_mac_window.py`
 
-### Purpose
+### 用途
 
-macOS-specific window operations.
+macOS 平台特定的窗口操作。
 
-### Functions
+### 函数
 
-- `list_windows()` → list[dict] (via Quartz)
-- `focus_window(title)` → bool (via AppleScript)
+- `list_windows()` → list[dict]（通过 Quartz）
+- `focus_window(title)` → bool（通过 AppleScript）
 - `find_and_get_geometry(title)` → dict | None
 
 ---
 
 ## 5. `utils/_linux_window.py`
 
-### Purpose
+### 用途
 
-Linux-specific window operations.
+Linux 平台特定的窗口操作。
 
-### Functions
+### 函数
 
-- `list_windows()` → list[dict] (via Xlib)
-- `focus_window(title)` → bool (via xdotool fallback)
+- `list_windows()` → list[dict]（通过 Xlib）
+- `focus_window(title)` → bool（通过 xdotool 回退）
 - `find_and_get_geometry(title)` → dict | None
 
 ---
 
 ## 6. `tools/screen.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
 | `tool_capture_screen` | save_dir, monitor | → `capture_full_screen()` |
 | `tool_capture_region` | x, y, width, height, save_dir | → `capture_region()` |
@@ -112,9 +112,9 @@ Linux-specific window operations.
 
 ## 7. `tools/window.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
 | `tool_list_windows` | — | → `list_windows()` |
 | `tool_find_windows` | title_contains | → `find_windows()` |
@@ -125,9 +125,9 @@ Linux-specific window operations.
 
 ## 8. `tools/mouse.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
 | `tool_mouse_click` | x, y, button, clicks, interval, hold_seconds | → `pyautogui.click()` / `mouseDown/Up` |
 | `tool_mouse_drag` | start_x/y, end_x/y, button, duration | → `pyautogui.moveTo` + `mouseDown` + `moveTo` + `mouseUp` |
@@ -139,38 +139,38 @@ Linux-specific window operations.
 
 ## 9. `tools/keyboard.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
 | `tool_key_press` | keys, presses, interval | → `pyautogui.press()` / `hotkey()` |
 | `tool_key_hold` | keys, hold_seconds | → `pyautogui.keyDown()` + sleep + `keyUp()` |
 | `tool_key_type` | text, interval | → `pyautogui.typewrite()` |
-| `tool_key_sequence` | sequence: list[dict] | → loop of press/hold/type with delays |
+| `tool_key_sequence` | sequence: list[dict] | → 带延迟的 press/hold/type 循环 |
 
 ---
 
 ## 10. `tools/combined.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
-| `tool_mouse_and_keyboard` | actions: list[dict] | → dispatcher loop over pyautogui operations |
+| `tool_mouse_and_keyboard` | actions: list[dict] | → pyautogui 操作分发循环 |
 
-### Supported Action Types
+### 支持的操作类型
 
-- `move`, `click`, `drag`, `scroll`, `mouse_down`, `mouse_up`
-- `key_press`, `key_hold`, `key_type`
-- `wait`, `screenshot`
+- `move`（移动）、`click`（点击）、`drag`（拖拽）、`scroll`（滚动）、`mouse_down`（鼠标按下）、`mouse_up`（鼠标释放）
+- `key_press`（按键）、`key_hold`（按住）、`key_type`（输入文本）
+- `wait`（等待）、`screenshot`（截图）
 
 ---
 
 ## 11. `tools/actions.py`
 
-### Tools
+### 工具
 
-| Tool | Parameters | Implementation |
+| 工具 | 参数 | 实现 |
 |---|---|---|
 | `tool_clipboard_get` | — | → `pyperclip.paste()` |
 | `tool_clipboard_set` | text | → `pyperclip.copy()` |
@@ -185,10 +185,10 @@ Linux-specific window operations.
 
 ## 12. `server.py`
 
-### Structure
+### 结构
 
-- `Server("control-mcp")` instance
-- `TOOLS` list: all 24 `Tool` definitions
-- `handle_list_tools()`: returns `TOOLS`
-- `handle_call_tool(name, arguments)`: dispatcher to tool functions
-- `main()`: runs stdio server (with Windows event loop policy fix)
+- `Server("control-mcp")` 实例
+- `TOOLS` 列表：所有 24 个 `Tool` 定义
+- `handle_list_tools()`：返回 `TOOLS`
+- `handle_call_tool(name, arguments)`：分发到工具函数
+- `main()`：运行 stdio 服务器（附带 Windows 事件循环策略修复）
