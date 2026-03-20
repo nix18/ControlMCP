@@ -65,7 +65,9 @@ TOOLS: list[Tool] = [
         name="capture_screen",
         description=(
             "Capture the full screen or a specific monitor. "
-            "Returns a JSON object with file_path, timestamp, width, height, x, y."
+            "Returns a JSON object with file_path, timestamp, width, height, x, y, file_size, quality. "
+            "TIP: Use quality=70-80 (default) for 5-8x smaller JPEG files. Use max_width=960 to halve "
+            "token cost when LLM analyzes the image. Coordinates in response are SCREEN coordinates."
         ),
         inputSchema={
             "type": "object",
@@ -78,6 +80,15 @@ TOOLS: list[Tool] = [
                     "type": "integer",
                     "description": "1-based monitor index. Omit for all monitors combined.",
                 },
+                "quality": {
+                    "type": "integer",
+                    "description": "JPEG quality 1-100. Default 80. 100=PNG lossless. 70=small file, still clear.",
+                    "default": 80,
+                },
+                "max_width": {
+                    "type": "integer",
+                    "description": "Scale image to max width (preserves aspect). E.g. 960 halves a 1920px screen.",
+                },
             },
         },
     ),
@@ -85,7 +96,8 @@ TOOLS: list[Tool] = [
         name="capture_region",
         description=(
             "Capture a rectangular region of the screen defined by (x, y, width, height). "
-            "Returns a JSON object with file_path, timestamp, width, height, x, y."
+            "Returns a JSON object with file_path, timestamp, width, height, x, y, file_size, quality. "
+            "TIP: Use quality=70-80 and max_width to reduce file size and token cost."
         ),
         inputSchema={
             "type": "object",
@@ -98,13 +110,25 @@ TOOLS: list[Tool] = [
                     "type": "string",
                     "description": "Directory to save the screenshot.",
                 },
+                "quality": {
+                    "type": "integer",
+                    "description": "JPEG quality 1-100. Default 80. 100=PNG lossless.",
+                    "default": 80,
+                },
+                "max_width": {
+                    "type": "integer",
+                    "description": "Scale image to max width.",
+                },
             },
             "required": ["x", "y", "width", "height"],
         },
     ),
     Tool(
         name="get_screen_info",
-        description="Get information about all connected monitors (resolution, position).",
+        description=(
+            "Get information about all connected monitors (resolution, position). "
+            "Useful for understanding the coordinate space. Primary monitor starts at (0,0)."
+        ),
         inputSchema={"type": "object", "properties": {}},
     ),
     # --- Window management ---
@@ -145,7 +169,11 @@ TOOLS: list[Tool] = [
         name="capture_window",
         description=(
             "Focus a window and capture a screenshot of it. "
-            "Returns file_path, window geometry, and screenshot dimensions."
+            "Returns file_path, window geometry, screenshot dimensions, file_size, quality. "
+            "COORDINATES: The returned (window_x, window_y) is the window's SCREEN position. "
+            "Elements inside the screenshot are at LOCAL coordinates (0,0 = top-left of window). "
+            "To click an element at screenshot (sx, sy), use screen_x = window_x + sx, screen_y = window_y + sy. "
+            "TIP: Use max_width=960 and quality=75 for token-efficient captures."
         ),
         inputSchema={
             "type": "object",
@@ -158,6 +186,15 @@ TOOLS: list[Tool] = [
                     "type": "string",
                     "description": "Directory to save the screenshot.",
                 },
+                "quality": {
+                    "type": "integer",
+                    "description": "JPEG quality 1-100. Default 80.",
+                    "default": 80,
+                },
+                "max_width": {
+                    "type": "integer",
+                    "description": "Scale image to max width.",
+                },
             },
             "required": ["title"],
         },
@@ -166,8 +203,11 @@ TOOLS: list[Tool] = [
     Tool(
         name="mouse_click",
         description=(
-            "Click the mouse at given screen coordinates. "
-            "Supports single/double/multi-click, long-hold, and left/right/middle buttons."
+            "Click the mouse at given SCREEN coordinates. "
+            "Supports single/double/multi-click, long-hold, and left/right/middle buttons. "
+            "COORDINATE SYSTEM: All coordinates are SCREEN-ABSOLUTE (pixels from top-left of primary monitor). "
+            "When clicking inside a captured window: screen_x = window_x + local_x, screen_y = window_y + local_y. "
+            "TIP: Prefer keyboard shortcuts over mouse clicks for precision (e.g. Ctrl+F5 instead of clicking a small button)."
         ),
         inputSchema={
             "type": "object",
@@ -314,7 +354,8 @@ TOOLS: list[Tool] = [
         name="key_sequence",
         description=(
             "Execute a sequence of keyboard actions with optional delays. "
-            "Each step: {action: 'press'|'hold'|'type', keys: [...], text: '...', hold_seconds: N, delay: N}"
+            "Each step: {action: 'press'|'hold'|'type'|'wait', keys: [...], text: '...', hold_seconds: N, seconds: N, delay: N}. "
+            "'delay' waits AFTER the step; 'wait' is a dedicated pause action with 'seconds' param."
         ),
         inputSchema={
             "type": "object",
@@ -335,7 +376,10 @@ TOOLS: list[Tool] = [
             "Execute a sequence of combined mouse and keyboard actions in one call. "
             "Supported actions: move, click, drag, scroll, mouse_down, mouse_up, "
             "key_press, key_hold, key_type, wait, screenshot. "
-            "Each step supports an optional 'delay' field."
+            "Each step supports an optional 'delay' field (seconds to wait AFTER the step). "
+            "ALL mouse coordinates are SCREEN-ABSOLUTE. "
+            "PREFER KEYBOARD SHORTCUTS: IDE actions like run (Ctrl+F5), build (Ctrl+F9), "
+            "save (Ctrl+S) are more reliable than clicking small buttons."
         ),
         inputSchema={
             "type": "object",
@@ -368,13 +412,24 @@ TOOLS: list[Tool] = [
     ),
     Tool(
         name="launch_app",
-        description="Launch an application by command or path.",
+        description=(
+            "Launch an application by command or path. "
+            "On Windows uses 'start' command for reliable GUI app launching."
+        ),
         inputSchema={
             "type": "object",
             "properties": {
                 "command": {
                     "type": "string",
-                    "description": "Command or full path to the application.",
+                    "description": (
+                        "App name (e.g. 'notepad', 'chrome'), "
+                        "full path, or protocol (e.g. 'ms-settings:')."
+                    ),
+                },
+                "args": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Optional arguments to pass to the application.",
                 },
             },
             "required": ["command"],
@@ -450,6 +505,8 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
             result = tool_capture_screen(
                 save_dir=args.get("save_dir"),
                 monitor=args.get("monitor"),
+                quality=args.get("quality", 80),
+                max_width=args.get("max_width"),
             )
         elif name == "capture_region":
             result = tool_capture_region(
@@ -458,6 +515,8 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
                 width=args["width"],
                 height=args["height"],
                 save_dir=args.get("save_dir"),
+                quality=args.get("quality", 80),
+                max_width=args.get("max_width"),
             )
         elif name == "get_screen_info":
             result = tool_get_screen_info()
@@ -468,7 +527,12 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
         elif name == "focus_window":
             result = tool_focus_window(args["title"])
         elif name == "capture_window":
-            result = tool_capture_window(args["title"], save_dir=args.get("save_dir"))
+            result = tool_capture_window(
+                args["title"],
+                save_dir=args.get("save_dir"),
+                quality=args.get("quality", 80),
+                max_width=args.get("max_width"),
+            )
         elif name == "mouse_click":
             result = tool_mouse_click(
                 x=args["x"],
@@ -512,7 +576,7 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
         elif name == "clipboard_set":
             result = tool_clipboard_set(args["text"])
         elif name == "launch_app":
-            result = tool_launch_app(args["command"])
+            result = tool_launch_app(args["command"], args.get("args", ""))
         elif name == "launch_url":
             result = tool_launch_url(args["url"])
         elif name == "wait":

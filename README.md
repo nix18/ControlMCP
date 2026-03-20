@@ -141,6 +141,19 @@ See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 | [docs/MODULE_DESIGN.md](docs/MODULE_DESIGN.md) | Module design |
 | [docs/FUNCTIONAL_DESIGN.md](docs/FUNCTIONAL_DESIGN.md) | Functional design |
 | [docs/TUTORIAL.md](docs/TUTORIAL.md) | Tutorial & examples |
+| [skills/computer-control/](skills/computer-control/) | Agent Skill: computer operation SOPs |
+
+## Agent Skill
+
+The `skills/computer-control/` folder contains a ready-to-use Agent Skill that teaches LLMs how to operate computers proficiently:
+
+- **5 Golden Rules**: Keyboard-first, coordinate conversion, screenshot cost awareness, wait after action, verify before click
+- **7 Standard SOPs**: Window ops, screenshot-click, key sequences, compound ops, pixel verification, clipboard input, file navigation
+- **IDE Shortcut Tables**: IntelliJ IDEA, VS Code, Eclipse (40+ shortcuts)
+- **Browser/System Shortcuts**: 20+ browser shortcuts, Windows/macOS operations
+- **7 Common Pitfalls**: Coordinate confusion, DPI scaling, window occlusion, input method, dual monitors, etc.
+
+Copy `skills/computer-control/` to your Agent's skills directory to enable.
 
 ## Project Structure
 
@@ -167,10 +180,16 @@ ControlMCP/
 │       │   └── actions.py             # Additional actions
 │       └── utils/
 │           ├── __init__.py
-│           ├── capture.py             # Capture utilities
+│           ├── capture.py             # Capture utilities (JPEG, resize)
 │           ├── _win_window.py         # Windows backend
 │           ├── _mac_window.py         # macOS backend
 │           └── _linux_window.py       # Linux backend
+├── skills/
+│   └── computer-control/              # Agent Skill: computer operation SOPs
+│       ├── SKILL.md                   # Main skill instructions
+│       ├── docs/
+│       │   └── coordinate-system.md   # Coordinate system reference
+│       └── README.md                  # Installation guide
 ├── docs/
 │   ├── REQUIREMENTS.md
 │   ├── ARCHITECTURE.md

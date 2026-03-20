@@ -48,6 +48,8 @@ def tool_focus_window(title: str) -> str:
 def tool_capture_window(
     title: str,
     save_dir: str | None = None,
+    quality: int = 80,
+    max_width: int | None = None,
 ) -> str:
     """Focus a window and capture a screenshot of it.
 
@@ -59,6 +61,10 @@ def tool_capture_window(
         Substring of the window title to capture.
     save_dir:
         Directory to save the screenshot.
+    quality:
+        JPEG quality 1-100. Default 80. 100 = PNG lossless.
+    max_width:
+        Scale image to this max width (preserving aspect ratio).
     """
-    result = capture_window(title, save_dir=save_dir)
+    result = capture_window(title, save_dir=save_dir, quality=quality, max_width=max_width)
     return result.to_json()

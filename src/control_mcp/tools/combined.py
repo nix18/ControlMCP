@@ -34,7 +34,7 @@ def tool_mouse_and_keyboard(
 
     **Utility:**
     - ``wait``: ``{"action": "wait", "seconds": float}``
-    - ``screenshot``: ``{"action": "screenshot", "save_dir": str}``
+    - ``screenshot``: ``{"action": "screenshot", "save_dir": str, "quality": int, "max_width": int}``
 
     All actions accept an optional ``"delay"`` field (seconds) to wait AFTER the step.
 
@@ -145,7 +145,11 @@ def tool_mouse_and_keyboard(
                 elif action_type == "screenshot":
                     from control_mcp.utils.capture import capture_full_screen
 
-                    res = capture_full_screen(save_dir=step.get("save_dir"))
+                    res = capture_full_screen(
+                        save_dir=step.get("save_dir"),
+                        quality=step.get("quality", 80),
+                        max_width=step.get("max_width"),
+                    )
                     step_result["success"] = True
                     step_result["screenshot"] = res.to_dict()
 

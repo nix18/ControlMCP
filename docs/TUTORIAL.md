@@ -25,18 +25,32 @@ tool: capture_screen
 args: {}
 ```
 
+### Compressed screenshot (recommended)
+
+Use `quality=75` for JPEG (~5-8x smaller than PNG) and `max_width=960` to halve resolution.
+
+```
+tool: capture_screen
+args: {"quality": 75, "max_width": 960}
+```
+
 **Response:**
 ```json
 {
-  "file_path": "/tmp/control_mcp_screenshots/screen_20260320_143022_123456_1920x1080_0_0.png",
+  "file_path": "/tmp/control_mcp_screenshots/screen_20260320_143022_123456_1920x1080_0_0.jpg",
   "timestamp": "2026-03-20T14:30:22.123456",
-  "width": 1920,
-  "height": 1080,
+  "width": 960,
+  "height": 540,
   "x": 0,
   "y": 0,
-  "monitor_index": null
+  "monitor_index": null,
+  "file_size": 85000,
+  "quality": 75
 }
 ```
+
+> **Tip:** `quality=100` produces lossless PNG. Lower quality = smaller files.
+> `max_width` scales the image down (preserving aspect ratio), reducing token cost when LLMs analyze the screenshot.
 
 ### Capture a specific region
 
@@ -218,18 +232,21 @@ args: {"text": "Hello, World!", "interval": 0.05}
 
 ### Execute a key sequence
 
-Executes a sequence of keyboard actions with delays between steps.
+Executes a sequence of keyboard actions with delays between steps. Supports `press`, `hold`, `type`, and `wait` actions.
 
 ```
 tool: key_sequence
 args: {
   "sequence": [
     {"action": "press", "keys": ["ctrl", "a"], "delay": 0.2},
+    {"action": "wait", "seconds": 0.3},
     {"action": "type", "text": "New content here", "delay": 0.1},
     {"action": "press", "keys": ["enter"], "delay": 0}
   ]
 }
 ```
+
+> **Note:** Use `"delay"` (seconds to wait AFTER a step) for simple pauses. Use `"action": "wait"` with `"seconds"` for explicit pauses between non-key actions.
 
 ---
 

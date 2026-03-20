@@ -15,6 +15,8 @@ from control_mcp.schemas.responses import OperationResult
 def tool_capture_screen(
     save_dir: str | None = None,
     monitor: int | None = None,
+    quality: int = 80,
+    max_width: int | None = None,
 ) -> str:
     """Capture the full screen or a specific monitor.
 
@@ -24,8 +26,16 @@ def tool_capture_screen(
         Directory to save the screenshot. Defaults to system temp directory.
     monitor:
         1-based monitor index. None = virtual screen (all monitors combined).
+    quality:
+        JPEG quality 1-100. Default 80 (~5-8x smaller than PNG, visually lossless).
+        Set to 100 for lossless PNG. Lower values = smaller files.
+    max_width:
+        Scale image to this max width (preserving aspect ratio).
+        E.g. 960 halves a 1920-wide screen. Reduces token cost for LLM analysis.
     """
-    result = capture_full_screen(save_dir=save_dir, monitor_index=monitor)
+    result = capture_full_screen(
+        save_dir=save_dir, monitor_index=monitor, quality=quality, max_width=max_width
+    )
     return result.to_json()
 
 
@@ -35,6 +45,8 @@ def tool_capture_region(
     width: int,
     height: int,
     save_dir: str | None = None,
+    quality: int = 80,
+    max_width: int | None = None,
 ) -> str:
     """Capture a rectangular region of the screen.
 
@@ -50,8 +62,14 @@ def tool_capture_region(
         Height of the capture region in pixels.
     save_dir:
         Directory to save the screenshot.
+    quality:
+        JPEG quality 1-100. Default 80. 100 = PNG lossless.
+    max_width:
+        Scale image to this max width (preserving aspect ratio).
     """
-    result = capture_region(x, y, width, height, save_dir=save_dir)
+    result = capture_region(
+        x, y, width, height, save_dir=save_dir, quality=quality, max_width=max_width
+    )
     return result.to_json()
 
 

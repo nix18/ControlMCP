@@ -111,16 +111,18 @@ def tool_key_sequence(
     """Execute a sequence of keyboard actions with optional delays between them.
 
     Each element of *sequence* is a dict with:
-    - ``action``: "press" | "hold" | "type"
+    - ``action``: "press" | "hold" | "type" | "wait"
     - ``keys``: list of key names (for press/hold)
     - ``text``: string (for type)
     - ``hold_seconds``: float (for hold)
+    - ``seconds``: float (for wait)
     - ``delay``: seconds to wait AFTER this step
 
     Example::
 
         [
             {"action": "press", "keys": ["ctrl", "a"], "delay": 0.2},
+            {"action": "wait", "seconds": 0.3},
             {"action": "type", "text": "hello", "delay": 0.1},
             {"action": "press", "keys": ["enter"], "delay": 0}
         ]
@@ -158,6 +160,10 @@ def tool_key_sequence(
                         if interval > 0:
                             time.sleep(interval)
                 results.append({"step": i, "action": "type", "text": text, "success": True})
+            elif action == "wait":
+                wait_sec = step.get("seconds", 1.0)
+                time.sleep(wait_sec)
+                results.append({"step": i, "action": "wait", "seconds": wait_sec, "success": True})
             else:
                 results.append(
                     {"step": i, "action": action, "success": False, "error": "unknown action"}

@@ -44,6 +44,8 @@ class ScreenshotResult:
     x: int = 0  # top-left x of captured region
     y: int = 0  # top-left y of captured region
     monitor_index: int | None = None
+    file_size: int = 0  # bytes
+    quality: int = 80  # JPEG quality (100 = PNG lossless)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False, default=str)
@@ -65,6 +67,8 @@ class WindowScreenshotResult:
     window_height: int
     screenshot_width: int
     screenshot_height: int
+    file_size: int = 0
+    quality: int = 80
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False, default=str)
