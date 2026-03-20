@@ -42,32 +42,90 @@ class TestClipboard:
 
 
 class TestLaunchApp:
+    @patch("control_mcp.tools.actions.time")
     @patch("control_mcp.tools.actions.subprocess")
     @patch("control_mcp.tools.actions.platform")
-    def test_windows(self, mock_platform, mock_subprocess):
+    def test_windows(self, mock_platform, mock_subprocess, mock_time):
         mock_platform.system.return_value = "Windows"
+        mock_proc = MagicMock()
+        mock_proc.poll.return_value = None  # still running = success
+        mock_subprocess.Popen.return_value = mock_proc
+
         result = tool_launch_app("notepad")
         data = json.loads(result)
         assert data["success"] is True
-        mock_subprocess.Popen.assert_called_once_with("notepad", shell=True)
+        call_args = mock_subprocess.Popen.call_args[0][0]
+        assert call_args == ["cmd", "/c", "start", "", "notepad"]
 
+    @patch("control_mcp.tools.actions.time")
     @patch("control_mcp.tools.actions.subprocess")
     @patch("control_mcp.tools.actions.platform")
-    def test_macos(self, mock_platform, mock_subprocess):
+    def test_windows_with_args(self, mock_platform, mock_subprocess, mock_time):
+        mock_platform.system.return_value = "Windows"
+        mock_proc = MagicMock()
+        mock_proc.poll.return_value = None
+        mock_subprocess.Popen.return_value = mock_proc
+
+        result = tool_launch_app("notepad", args="file.txt")
+        data = json.loads(result)
+        assert data["success"] is True
+        call_args = mock_subprocess.Popen.call_args[0][0]
+        assert "file.txt" in call_args
+
+    @patch("control_mcp.tools.actions.time")
+    @patch("control_mcp.tools.actions.subprocess")
+    @patch("control_mcp.tools.actions.platform")
+    def test_windows_immediate_exit(self, mock_platform, mock_subprocess, mock_time):
+        mock_platform.system.return_value = "Windows"
+        mock_proc = MagicMock()
+        mock_proc.poll.return_value = 1  # exited with error
+        mock_proc.stderr.read.return_value = b"some error"
+        mock_subprocess.Popen.return_value = mock_proc
+
+        result = tool_launch_app("bad_app")
+        data = json.loads(result)
+        assert data["success"] is False
+
+    @patch("control_mcp.tools.actions.time")
+    @patch("control_mcp.tools.actions.subprocess")
+    @patch("control_mcp.tools.actions.platform")
+    def test_macos(self, mock_platform, mock_subprocess, mock_time):
         mock_platform.system.return_value = "Darwin"
+        mock_proc = MagicMock()
+        mock_proc.poll.return_value = None
+        mock_subprocess.Popen.return_value = mock_proc
+
         result = tool_launch_app("TextEdit")
         data = json.loads(result)
         assert data["success"] is True
-        mock_subprocess.Popen.assert_called_once_with(["open", "-a", "TextEdit"])
+        call_args = mock_subprocess.Popen.call_args[0][0]
+        assert call_args[0] == "open"
+        assert "-a" in call_args
+        assert "TextEdit" in call_args
 
+    @patch("control_mcp.tools.actions.time")
     @patch("control_mcp.tools.actions.subprocess")
     @patch("control_mcp.tools.actions.platform")
-    def test_failure(self, mock_platform, mock_subprocess):
+    def test_linux(self, mock_platform, mock_subprocess, mock_time):
+        mock_platform.system.return_value = "Linux"
+        mock_proc = MagicMock()
+        mock_proc.poll.return_value = None
+        mock_subprocess.Popen.return_value = mock_proc
+
+        result = tool_launch_app("gedit")
+        data = json.loads(result)
+        assert data["success"] is True
+
+    @patch("control_mcp.tools.actions.time")
+    @patch("control_mcp.tools.actions.subprocess")
+    @patch("control_mcp.tools.actions.platform")
+    def test_failure(self, mock_platform, mock_subprocess, mock_time):
         mock_platform.system.return_value = "Linux"
         mock_subprocess.Popen.side_effect = Exception("launch fail")
         result = tool_launch_app("bad_cmd")
         data = json.loads(result)
         assert data["success"] is False
+        assert "launch fail" in data["message"]
 
 
 class TestLaunchUrl:

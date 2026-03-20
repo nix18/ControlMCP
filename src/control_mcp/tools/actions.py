@@ -65,25 +65,79 @@ def tool_clipboard_set(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def tool_launch_app(command: str) -> str:
+def tool_launch_app(command: str, args: str = "") -> str:
     """Launch an application by command/path.
 
     Parameters
     ----------
     command:
         The command or full path to the application executable.
+        On Windows: can be an app name (e.g. "notepad", "chrome"),
+        a full path (e.g. "C:\\Program Files\\app.exe"),
+        or a URL/protocol (e.g. "ms-settings:").
+    args:
+        Optional arguments to pass to the application.
     """
     try:
         system = platform.system()
         if system == "Windows":
-            subprocess.Popen(command, shell=True)
+            # Use 'start' via cmd to reliably launch GUI apps
+            # '""' is an empty title required by start
+            cmd_parts = ["cmd", "/c", "start", "", command]
+            if args:
+                cmd_parts.append(args)
+            proc = subprocess.Popen(
+                cmd_parts,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            # Give it a moment and check for immediate failure
+            time.sleep(0.5)
+            ret = proc.poll()
+            if ret is not None and ret != 0:
+                stderr = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+                return OperationResult(
+                    success=False,
+                    message=f"Process exited with code {ret}: {stderr.strip()}",
+                ).to_json()
         elif system == "Darwin":
-            subprocess.Popen(["open", "-a", command])
+            cmd_list = ["open", "-a", command]
+            if args:
+                cmd_list.extend(["--args", *args.split()])
+            proc = subprocess.Popen(
+                cmd_list,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            time.sleep(0.5)
+            ret = proc.poll()
+            if ret is not None and ret != 0:
+                stderr = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+                return OperationResult(
+                    success=False,
+                    message=f"open failed (exit {ret}): {stderr.strip()}",
+                ).to_json()
         else:
-            subprocess.Popen(command, shell=True)
+            cmd_str = f"{command} {args}".strip()
+            proc = subprocess.Popen(
+                cmd_str,
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                start_new_session=True,
+            )
+            time.sleep(0.5)
+            ret = proc.poll()
+            if ret is not None and ret != 0:
+                stderr = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+                return OperationResult(
+                    success=False,
+                    message=f"Launch failed (exit {ret}): {stderr.strip()}",
+                ).to_json()
+
         return OperationResult(success=True, message=f"Launched: {command}").to_json()
     except Exception as e:
-        return OperationResult(success=False, message=str(e)).to_json()
+        return OperationResult(success=False, message=f"{type(e).__name__}: {e}").to_json()
 
 
 def tool_launch_url(url: str) -> str:
