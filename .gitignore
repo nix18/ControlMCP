@@ -19,3 +19,4 @@ htmlcov/
 *.so
 .DS_Store
 Thumbs.db
+.idea
