@@ -1,0 +1,424 @@
+# Tutorial & Examples
+
+This tutorial shows how to use ControlMCP tools — both individually and in combination — to automate computer operations through an LLM.
+
+## Table of Contents
+
+1. [Screen Capture](#1-screen-capture)
+2. [Window Management](#2-window-management)
+3. [Mouse Control](#3-mouse-control)
+4. [Keyboard Control](#4-keyboard-control)
+5. [Combined Operations](#5-combined-operations)
+6. [Additional Actions](#6-additional-actions)
+7. [Real-World Patterns](#7-real-world-patterns)
+
+---
+
+## 1. Screen Capture
+
+### Take a full-screen screenshot
+
+```
+tool: capture_screen
+args: {}
+```
+
+**Response:**
+```json
+{
+  "file_path": "/tmp/control_mcp_screenshots/screen_20260320_143022_123456_1920x1080_0_0.png",
+  "timestamp": "2026-03-20T14:30:22.123456",
+  "width": 1920,
+  "height": 1080,
+  "x": 0,
+  "y": 0,
+  "monitor_index": null
+}
+```
+
+### Capture a specific region
+
+```
+tool: capture_region
+args: {"x": 100, "y": 200, "width": 800, "height": 600}
+```
+
+### Capture second monitor
+
+```
+tool: capture_screen
+args: {"monitor": 2, "save_dir": "C:/screenshots"}
+```
+
+### Get monitor info
+
+```
+tool: get_screen_info
+args: {}
+```
+
+---
+
+## 2. Window Management
+
+### List all windows
+
+```
+tool: list_windows
+args: {}
+```
+
+### Find Chrome windows
+
+```
+tool: find_windows
+args: {"title_contains": "chrome"}
+```
+
+### Focus and screenshot a window
+
+```
+tool: capture_window
+args: {"title": "Notepad", "save_dir": "C:/screenshots"}
+```
+
+This will:
+1. Find the window with "Notepad" in its title
+2. Bring it to the foreground
+3. Take a screenshot of just that window
+4. Return the file path, window position, and dimensions
+
+---
+
+## 3. Mouse Control
+
+### Single click
+
+```
+tool: mouse_click
+args: {"x": 500, "y": 300}
+```
+
+### Double-click
+
+```
+tool: mouse_click
+args: {"x": 500, "y": 300, "clicks": 2}
+```
+
+### Right-click
+
+```
+tool: mouse_click
+args: {"x": 500, "y": 300, "button": "right"}
+```
+
+### Long-press (hold for 3 seconds)
+
+```
+tool: mouse_click
+args: {"x": 500, "y": 300, "hold_seconds": 3.0}
+```
+
+### Drag from one point to another
+
+```
+tool: mouse_drag
+args: {"start_x": 100, "start_y": 100, "end_x": 800, "end_y": 600, "duration": 0.5}
+```
+
+### Move cursor
+
+```
+tool: mouse_move
+args: {"x": 960, "y": 540, "duration": 0.25}
+```
+
+### Get current position
+
+```
+tool: mouse_position
+args: {}
+```
+
+### Scroll down
+
+```
+tool: mouse_scroll
+args: {"clicks": -5}
+```
+
+### Scroll up at specific position
+
+```
+tool: mouse_scroll
+args: {"clicks": 3, "x": 500, "y": 300}
+```
+
+---
+
+## 4. Keyboard Control
+
+### Press Enter
+
+```
+tool: key_press
+args: {"keys": ["enter"]}
+```
+
+### Press Ctrl+C (copy)
+
+```
+tool: key_press
+args: {"keys": ["ctrl", "c"]}
+```
+
+### Press Alt+Tab 3 times
+
+```
+tool: key_press
+args: {"keys": ["alt", "tab"], "presses": 3, "interval": 0.5}
+```
+
+### Hold Shift for 2 seconds
+
+```
+tool: key_hold
+args: {"keys": ["shift"], "hold_seconds": 2.0}
+```
+
+### Type text
+
+```
+tool: key_type
+args: {"text": "Hello, World!", "interval": 0.05}
+```
+
+### Execute a key sequence
+
+```
+tool: key_sequence
+args: {
+  "sequence": [
+    {"action": "press", "keys": ["ctrl", "a"], "delay": 0.2},
+    {"action": "type", "text": "New content here", "delay": 0.1},
+    {"action": "press", "keys": ["enter"], "delay": 0}
+  ]
+}
+```
+
+---
+
+## 5. Combined Operations
+
+The `mouse_and_keyboard` tool lets you chain mouse and keyboard actions:
+
+### Open a file in Notepad and type
+
+```
+tool: mouse_and_keyboard
+args: {
+  "actions": [
+    {"action": "key_press", "keys": ["win"]},
+    {"action": "wait", "seconds": 1.0},
+    {"action": "key_type", "text": "notepad"},
+    {"action": "key_press", "keys": ["enter"]},
+    {"action": "wait", "seconds": 2.0},
+    {"action": "key_type", "text": "Hello from ControlMCP!", "interval": 0.02}
+  ]
+}
+```
+
+### Select all text and replace it
+
+```
+tool: mouse_and_keyboard
+args: {
+  "actions": [
+    {"action": "key_press", "keys": ["ctrl", "a"], "delay": 0.2},
+    {"action": "key_type", "text": "Replacement text", "delay": 0.1}
+  ]
+}
+```
+
+### Click a button, wait, then take a screenshot
+
+```
+tool: mouse_and_keyboard
+args: {
+  "actions": [
+    {"action": "click", "x": 500, "y": 300, "delay": 0.5},
+    {"action": "screenshot", "save_dir": "/tmp/results"}
+  ]
+}
+```
+
+### Drag a slider
+
+```
+tool: mouse_and_keyboard
+args: {
+  "actions": [
+    {"action": "move", "x": 200, "y": 500, "delay": 0.2},
+    {"action": "mouse_down", "x": 200, "y": 500, "button": "left"},
+    {"action": "move", "x": 800, "y": 500, "duration": 0.3},
+    {"action": "mouse_up", "x": 800, "y": 500, "button": "left"}
+  ]
+}
+```
+
+### Complex form filling
+
+```
+tool: mouse_and_keyboard
+args: {
+  "actions": [
+    {"action": "click", "x": 400, "y": 250, "delay": 0.3},
+    {"action": "key_type", "text": "John Doe", "delay": 0.2},
+    {"action": "key_press", "keys": ["tab"], "delay": 0.2},
+    {"action": "key_type", "text": "john@example.com", "delay": 0.2},
+    {"action": "key_press", "keys": ["tab"], "delay": 0.2},
+    {"action": "key_type", "text": "555-1234", "delay": 0.2},
+    {"action": "click", "x": 400, "y": 400, "delay": 0.5},
+    {"action": "screenshot"}
+  ]
+}
+```
+
+---
+
+## 6. Additional Actions
+
+### Get clipboard content
+
+```
+tool: clipboard_get
+args: {}
+```
+
+### Set clipboard and paste
+
+```
+tool: clipboard_set
+args: {"text": "Hello from clipboard!"}
+```
+Then use `key_press` with `["ctrl", "v"]` to paste.
+
+### Launch an app
+
+```
+tool: launch_app
+args: {"command": "notepad"}   # Windows
+tool: launch_app
+args: {"command": "TextEdit"}  # macOS
+```
+
+### Open a URL
+
+```
+tool: launch_url
+args: {"url": "https://example.com"}
+```
+
+### Get pixel color
+
+```
+tool: get_pixel_color
+args: {"x": 500, "y": 300}
+```
+
+Response: `{"x": 500, "y": 300, "r": 255, "g": 128, "b": 0, "hex": "#ff8000"}`
+
+### Wait
+
+```
+tool: wait
+args: {"seconds": 2.5}
+```
+
+### Hotkey shortcut
+
+```
+tool: hotkey
+args: {"keys": ["ctrl", "shift", "s"]}  # Save As
+```
+
+---
+
+## 7. Real-World Patterns
+
+### Pattern: Screenshot → Analyze → Click
+
+1. Take a screenshot
+2. LLM analyzes the image
+3. Click on the identified element
+
+```
+# Step 1
+tool: capture_screen → returns file_path
+
+# [LLM analyzes the image at file_path]
+
+# Step 2
+tool: mouse_click → {"x": identified_x, "y": identified_y}
+```
+
+### Pattern: Window workflow
+
+1. Find and focus a window
+2. Take a screenshot of it
+3. Perform actions in that window
+
+```
+tool: find_windows → {"title_contains": "VS Code"}
+tool: capture_window → {"title": "VS Code"}
+tool: key_press → {"keys": ["ctrl", "shift", "p"]}
+tool: key_type → {"text": "Format Document"}
+tool: key_press → {"keys": ["enter"]}
+```
+
+### Pattern: Repeat-action loop
+
+Use `mouse_and_keyboard` with a sequence that includes clicking a "next" button:
+
+```
+tool: mouse_and_keyboard → {
+  "actions": [
+    {"action": "click", "x": 500, "y": 300, "delay": 0.5},
+    {"action": "key_press", "keys": ["ctrl", "c"], "delay": 0.2},
+    {"action": "click", "x": 900, "y": 500, "delay": 0.5}  # next button
+  ]
+}
+```
+
+### Pattern: Wait for element then interact
+
+```
+tool: wait → {"seconds": 3.0}
+tool: capture_screen
+# [LLM checks if target element appeared]
+tool: mouse_click → {"x": element_x, "y": element_y}
+```
+
+---
+
+## Key Names Reference
+
+Common key names (pyautogui convention):
+
+| Key | Name |
+|-----|------|
+| Enter | `enter` / `return` |
+| Tab | `tab` |
+| Escape | `escape` |
+| Backspace | `backspace` |
+| Delete | `delete` |
+| Space | `space` |
+| Arrow keys | `up`, `down`, `left`, `right` |
+| Function keys | `f1` through `f15` |
+| Modifiers | `ctrl`, `alt`, `shift`, `win` (Windows) / `command` (Mac) |
+| Home/End | `home`, `end` |
+| Page Up/Down | `pageup`, `pagedown` |
+| Print Screen | `printscreen` |
+
+For a full list, see [pyautogui documentation](https://pyautogui.readthedocs.io/en/latest/keyboard.html).
