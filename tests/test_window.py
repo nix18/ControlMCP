@@ -1,13 +1,15 @@
 """Tests for window management tools (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from control_mcp.tools.window import (
-    tool_list_windows,
+    tool_capture_window,
     tool_find_windows,
     tool_focus_window,
-    tool_capture_window,
+    tool_list_windows,
 )
 
 SAMPLE_WINDOWS = [
@@ -88,7 +90,12 @@ class TestToolCaptureWindow:
         mock_capture.return_value = mock_result
 
         result = tool_capture_window("Notepad")
-        mock_capture.assert_called_once_with("Notepad", save_dir=None)
+        mock_capture.assert_called_once_with(
+            "Notepad",
+            save_dir=None,
+            quality=80,
+            max_width=None,
+        )
         data = json.loads(result)
         assert "Notepad" in data["window_title"]
 
@@ -98,14 +105,16 @@ class TestToolCaptureWindow:
         mock_result.to_json.return_value = "{}"
         mock_capture.return_value = mock_result
 
-        tool_capture_window("Chrome", save_dir="/screenshots")
-        mock_capture.assert_called_once_with("Chrome", save_dir="/screenshots")
+        tool_capture_window("Chrome", save_dir="/screenshots", quality=75, max_width=900)
+        mock_capture.assert_called_once_with(
+            "Chrome",
+            save_dir="/screenshots",
+            quality=75,
+            max_width=900,
+        )
 
     @patch("control_mcp.tools.window.capture_window")
     def test_not_found_raises(self, mock_capture):
         mock_capture.side_effect = ValueError("No window found")
-        try:
+        with pytest.raises(ValueError, match="No window found"):
             tool_capture_window("missing_window")
-            assert False, "Should have raised"
-        except ValueError:
-            pass

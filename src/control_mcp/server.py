@@ -10,18 +10,23 @@ import sys
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import TextContent, Tool
 
-from control_mcp.tools.screen import (
-    tool_capture_screen,
-    tool_capture_region,
-    tool_get_screen_info,
+from control_mcp.tools.actions import (
+    tool_clipboard_get,
+    tool_clipboard_set,
+    tool_get_pixel_color,
+    tool_hotkey,
+    tool_launch_app,
+    tool_launch_url,
+    tool_wait,
 )
-from control_mcp.tools.window import (
-    tool_list_windows,
-    tool_find_windows,
-    tool_focus_window,
-    tool_capture_window,
+from control_mcp.tools.combined import tool_mouse_and_keyboard
+from control_mcp.tools.keyboard import (
+    tool_key_hold,
+    tool_key_press,
+    tool_key_sequence,
+    tool_key_type,
 )
 from control_mcp.tools.mouse import (
     tool_mouse_click,
@@ -30,22 +35,17 @@ from control_mcp.tools.mouse import (
     tool_mouse_position,
     tool_mouse_scroll,
 )
-from control_mcp.tools.keyboard import (
-    tool_key_press,
-    tool_key_hold,
-    tool_key_type,
-    tool_key_sequence,
+from control_mcp.tools.screen import (
+    tool_capture_region,
+    tool_capture_screen,
+    tool_capture_scroll_region,
+    tool_get_screen_info,
 )
-from control_mcp.tools.combined import tool_mouse_and_keyboard
-from control_mcp.tools.actions import (
-    tool_clipboard_get,
-    tool_clipboard_set,
-    tool_launch_app,
-    tool_launch_url,
-    tool_wait,
-    tool_get_pixel_color,
-    tool_hotkey,
-    tool_screenshot,
+from control_mcp.tools.window import (
+    tool_capture_window,
+    tool_find_windows,
+    tool_focus_window,
+    tool_list_windows,
 )
 
 # ---------------------------------------------------------------------------
@@ -65,9 +65,10 @@ TOOLS: list[Tool] = [
         name="capture_screen",
         description=(
             "Capture the full screen or a specific monitor. "
-            "Returns a JSON object with file_path, timestamp, width, height, x, y, file_size, quality. "
-            "TIP: Use quality=70-80 (default) for 5-8x smaller JPEG files. Use max_width=960 to halve "
-            "token cost when LLM analyzes the image. Coordinates in response are SCREEN coordinates."
+            "Returns a JSON object with file_path, timestamp, width, height, x, y, "
+            "file_size, quality. TIP: Use quality=70-80 (default) for 5-8x smaller "
+            "JPEG files. Use max_width=960 to halve token cost when LLM analyzes "
+            "the image. Coordinates in response are SCREEN coordinates."
         ),
         inputSchema={
             "type": "object",
@@ -82,12 +83,18 @@ TOOLS: list[Tool] = [
                 },
                 "quality": {
                     "type": "integer",
-                    "description": "JPEG quality 1-100. Default 80. 100=PNG lossless. 70=small file, still clear.",
+                    "description": (
+                        "JPEG quality 1-100. Default 80. 100=PNG lossless. "
+                        "70=small file, still clear."
+                    ),
                     "default": 80,
                 },
                 "max_width": {
                     "type": "integer",
-                    "description": "Scale image to max width (preserves aspect). E.g. 960 halves a 1920px screen.",
+                    "description": (
+                        "Scale image to max width (preserves aspect). "
+                        "E.g. 960 halves a 1920px screen."
+                    ),
                 },
             },
         },
@@ -96,7 +103,8 @@ TOOLS: list[Tool] = [
         name="capture_region",
         description=(
             "Capture a rectangular region of the screen defined by (x, y, width, height). "
-            "Returns a JSON object with file_path, timestamp, width, height, x, y, file_size, quality. "
+            "Returns a JSON object with file_path, timestamp, width, height, x, y, "
+            "file_size, quality. "
             "TIP: Use quality=70-80 and max_width to reduce file size and token cost."
         ),
         inputSchema={
@@ -121,6 +129,58 @@ TOOLS: list[Tool] = [
                 },
             },
             "required": ["x", "y", "width", "height"],
+        },
+    ),
+    Tool(
+        name="capture_scroll_region",
+        description=(
+            "Capture a fixed screen region while scrolling inside it, then stitch "
+            "the frames into one long image. Use this for article panes, chat "
+            "history, or scrollable sidebars after the target view is already "
+            "open. Returns file_path plus basic metadata including final "
+            "width/height, capture_count, and scroll_distance."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "Left edge x-coordinate of the scroll area.",
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Top edge y-coordinate of the scroll area.",
+                },
+                "width": {
+                    "type": "integer",
+                    "description": "Width of the scroll area in pixels.",
+                },
+                "height": {
+                    "type": "integer",
+                    "description": "Height of the scroll area in pixels.",
+                },
+                "scroll_distance": {
+                    "type": "integer",
+                    "description": (
+                        "Total mouse-wheel distance. Negative scrolls down, "
+                        "positive scrolls up."
+                    ),
+                },
+                "save_dir": {
+                    "type": "string",
+                    "description": "Directory to save the stitched screenshot.",
+                },
+                "quality": {
+                    "type": "integer",
+                    "description": "JPEG quality 1-100. Default 80. 100=PNG lossless.",
+                    "default": 80,
+                },
+                "max_width": {
+                    "type": "integer",
+                    "description": "Scale the stitched image to this max width after stitching.",
+                },
+            },
+            "required": ["x", "y", "width", "height", "scroll_distance"],
         },
     ),
     Tool(
@@ -172,7 +232,8 @@ TOOLS: list[Tool] = [
             "Returns file_path, window geometry, screenshot dimensions, file_size, quality. "
             "COORDINATES: The returned (window_x, window_y) is the window's SCREEN position. "
             "Elements inside the screenshot are at LOCAL coordinates (0,0 = top-left of window). "
-            "To click an element at screenshot (sx, sy), use screen_x = window_x + sx, screen_y = window_y + sy. "
+            "To click an element at screenshot (sx, sy), use screen_x = window_x + sx, "
+            "screen_y = window_y + sy. "
             "TIP: Use max_width=960 and quality=75 for token-efficient captures."
         ),
         inputSchema={
@@ -205,9 +266,12 @@ TOOLS: list[Tool] = [
         description=(
             "Click the mouse at given SCREEN coordinates. "
             "Supports single/double/multi-click, long-hold, and left/right/middle buttons. "
-            "COORDINATE SYSTEM: All coordinates are SCREEN-ABSOLUTE (pixels from top-left of primary monitor). "
-            "When clicking inside a captured window: screen_x = window_x + local_x, screen_y = window_y + local_y. "
-            "TIP: Prefer keyboard shortcuts over mouse clicks for precision (e.g. Ctrl+F5 instead of clicking a small button)."
+            "COORDINATE SYSTEM: All coordinates are SCREEN-ABSOLUTE "
+            "(pixels from top-left of primary monitor). "
+            "When clicking inside a captured window: screen_x = window_x + local_x, "
+            "screen_y = window_y + local_y. "
+            "TIP: Prefer keyboard shortcuts over mouse clicks for precision "
+            "(e.g. Ctrl+F5 instead of clicking a small button)."
         ),
         inputSchema={
             "type": "object",
@@ -354,7 +418,8 @@ TOOLS: list[Tool] = [
         name="key_sequence",
         description=(
             "Execute a sequence of keyboard actions with optional delays. "
-            "Each step: {action: 'press'|'hold'|'type'|'wait', keys: [...], text: '...', hold_seconds: N, seconds: N, delay: N}. "
+            "Each step: {action: 'press'|'hold'|'type'|'wait', keys: [...], "
+            "text: '...', hold_seconds: N, seconds: N, delay: N}. "
             "'delay' waits AFTER the step; 'wait' is a dedicated pause action with 'seconds' param."
         ),
         inputSchema={
@@ -514,6 +579,17 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
                 y=args["y"],
                 width=args["width"],
                 height=args["height"],
+                save_dir=args.get("save_dir"),
+                quality=args.get("quality", 80),
+                max_width=args.get("max_width"),
+            )
+        elif name == "capture_scroll_region":
+            result = tool_capture_scroll_region(
+                x=args["x"],
+                y=args["y"],
+                width=args["width"],
+                height=args["height"],
+                scroll_distance=args["scroll_distance"],
                 save_dir=args.get("save_dir"),
                 quality=args.get("quality", 80),
                 max_width=args.get("max_width"),

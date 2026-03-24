@@ -1,10 +1,14 @@
 """Tests for screen capture tools (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from control_mcp.tools.screen import tool_capture_screen, tool_capture_region, tool_get_screen_info
+from control_mcp.tools.screen import (
+    tool_capture_region,
+    tool_capture_screen,
+    tool_capture_scroll_region,
+    tool_get_screen_info,
+)
 
 
 class TestToolCaptureScreen:
@@ -15,7 +19,12 @@ class TestToolCaptureScreen:
         mock_capture.return_value = mock_result
 
         result = tool_capture_screen()
-        mock_capture.assert_called_once_with(save_dir=None, monitor_index=None)
+        mock_capture.assert_called_once_with(
+            save_dir=None,
+            monitor_index=None,
+            quality=80,
+            max_width=None,
+        )
         assert "test.png" in result
 
     @patch("control_mcp.tools.screen.capture_full_screen")
@@ -24,8 +33,13 @@ class TestToolCaptureScreen:
         mock_result.to_json.return_value = "{}"
         mock_capture.return_value = mock_result
 
-        tool_capture_screen(save_dir="/custom", monitor=2)
-        mock_capture.assert_called_once_with(save_dir="/custom", monitor_index=2)
+        tool_capture_screen(save_dir="/custom", monitor=2, quality=70, max_width=960)
+        mock_capture.assert_called_once_with(
+            save_dir="/custom",
+            monitor_index=2,
+            quality=70,
+            max_width=960,
+        )
 
 
 class TestToolCaptureRegion:
@@ -36,7 +50,15 @@ class TestToolCaptureRegion:
         mock_capture.return_value = mock_result
 
         result = tool_capture_region(x=100, y=200, width=800, height=600)
-        mock_capture.assert_called_once_with(100, 200, 800, 600, save_dir=None)
+        mock_capture.assert_called_once_with(
+            100,
+            200,
+            800,
+            600,
+            save_dir=None,
+            quality=80,
+            max_width=None,
+        )
         assert "800" in result
 
     @patch("control_mcp.tools.screen.capture_region")
@@ -45,8 +67,80 @@ class TestToolCaptureRegion:
         mock_result.to_json.return_value = "{}"
         mock_capture.return_value = mock_result
 
-        tool_capture_region(x=0, y=0, width=100, height=100, save_dir="/screenshots")
-        mock_capture.assert_called_once_with(0, 0, 100, 100, save_dir="/screenshots")
+        tool_capture_region(
+            x=0,
+            y=0,
+            width=100,
+            height=100,
+            save_dir="/screenshots",
+            quality=90,
+            max_width=640,
+        )
+        mock_capture.assert_called_once_with(
+            0,
+            0,
+            100,
+            100,
+            save_dir="/screenshots",
+            quality=90,
+            max_width=640,
+        )
+
+
+class TestToolCaptureScrollRegion:
+    @patch("control_mcp.tools.screen.capture_scroll_region")
+    def test_basic(self, mock_capture):
+        mock_result = MagicMock()
+        mock_result.to_json.return_value = '{"capture_count": 3}'
+        mock_capture.return_value = mock_result
+
+        result = tool_capture_scroll_region(
+            x=10,
+            y=20,
+            width=300,
+            height=400,
+            scroll_distance=-480,
+        )
+
+        mock_capture.assert_called_once_with(
+            x=10,
+            y=20,
+            width=300,
+            height=400,
+            scroll_distance=-480,
+            save_dir=None,
+            quality=80,
+            max_width=None,
+        )
+        assert '"capture_count": 3' in result
+
+    @patch("control_mcp.tools.screen.capture_scroll_region")
+    def test_with_optional_params(self, mock_capture):
+        mock_result = MagicMock()
+        mock_result.to_json.return_value = "{}"
+        mock_capture.return_value = mock_result
+
+        tool_capture_scroll_region(
+            x=10,
+            y=20,
+            width=300,
+            height=400,
+            scroll_distance=360,
+            save_dir="/shots",
+            quality=75,
+            max_width=800,
+        )
+
+        mock_capture.assert_called_once_with(
+            x=10,
+            y=20,
+            width=300,
+            height=400,
+            scroll_distance=360,
+            save_dir="/shots",
+            quality=75,
+            max_width=800,
+        )
 
 
 class TestToolGetScreenInfo:

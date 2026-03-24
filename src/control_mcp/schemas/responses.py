@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any
-
 
 # ---------------------------------------------------------------------------
 # Generic response helpers
@@ -67,6 +66,28 @@ class WindowScreenshotResult:
     window_height: int
     screenshot_width: int
     screenshot_height: int
+    file_size: int = 0
+    quality: int = 80
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self), ensure_ascii=False, default=str)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ScrollScreenshotResult:
+    """Result of a stitched scroll screenshot operation."""
+
+    file_path: str
+    timestamp: str
+    x: int
+    y: int
+    width: int
+    height: int
+    scroll_distance: int
+    capture_count: int
     file_size: int = 0
     quality: int = 80
 

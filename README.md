@@ -50,7 +50,7 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 }
 ```
 
-## Tools (24 total)
+## Tools (25 total)
 
 ### Screen Capture
 
@@ -58,6 +58,7 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 |------|-------------|
 | `capture_screen` | Full screen or monitor screenshot |
 | `capture_region` | Region screenshot (x, y, width, height) |
+| `capture_scroll_region` | Stitch a long screenshot while scrolling inside a fixed region |
 | `get_screen_info` | List all monitors with resolution |
 
 ### Window Management
@@ -105,7 +106,6 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 | `wait` | Pause for N seconds |
 | `get_pixel_color` | Get RGB color at screen coordinates |
 | `hotkey` | Press a keyboard shortcut |
-| `screenshot` | Alias for capture_screen |
 
 ## Examples
 

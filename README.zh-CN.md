@@ -50,7 +50,7 @@ control-mcp
 }
 ```
 
-## 工具列表（共 24 个）
+## 工具列表（共 25 个）
 
 ### 屏幕截图
 
@@ -58,6 +58,7 @@ control-mcp
 |------|------|
 | `capture_screen` | 全屏或指定显示器截图 |
 | `capture_region` | 区域截图（x, y, 宽, 高） |
+| `capture_scroll_region` | 在固定区域内滚动并拼接成长截图 |
 | `get_screen_info` | 列出所有显示器及其分辨率 |
 
 ### 窗口管理
@@ -105,8 +106,6 @@ control-mcp
 | `wait` | 暂停 N 秒 |
 | `get_pixel_color` | 获取屏幕坐标处的 RGB 颜色 |
 | `hotkey` | 按下键盘快捷键 |
-| `screenshot` | capture_screen 的别名 |
-
 ## 使用示例
 
 完整使用示例请参阅 [docs/zh-CN/TUTORIAL.md](docs/zh-CN/TUTORIAL.md)。

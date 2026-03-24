@@ -7,9 +7,9 @@ import json
 from control_mcp.utils.capture import (
     capture_full_screen,
     capture_region,
+    capture_scroll_region,
     get_monitors,
 )
-from control_mcp.schemas.responses import OperationResult
 
 
 def tool_capture_screen(
@@ -69,6 +69,30 @@ def tool_capture_region(
     """
     result = capture_region(
         x, y, width, height, save_dir=save_dir, quality=quality, max_width=max_width
+    )
+    return result.to_json()
+
+
+def tool_capture_scroll_region(
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    scroll_distance: int,
+    save_dir: str | None = None,
+    quality: int = 80,
+    max_width: int | None = None,
+) -> str:
+    """Capture a scrollable screen region and stitch it into one long image."""
+    result = capture_scroll_region(
+        x=x,
+        y=y,
+        width=width,
+        height=height,
+        scroll_distance=scroll_distance,
+        save_dir=save_dir,
+        quality=quality,
+        max_width=max_width,
     )
     return result.to_json()
 
