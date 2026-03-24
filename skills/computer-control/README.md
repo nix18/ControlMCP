@@ -37,3 +37,45 @@ computer-control/
 - 需要精确点击时看 `docs/coordinate-system.md`
 - 遇到窗口尺寸、最小化、分屏问题时看 `docs/window-management.md`
 - 需要启动 IDEA 配置并观察日志时看 `docs/idea-run-workflow.md`
+
+## 安装到 Agent
+
+你可以把这个目录复制到 Agent 的 `skills/` 目录，也可以直接创建软链接。
+
+### 方式 1：复制目录
+
+```bash
+# Codex CLI
+cp -r skills/computer-control ~/.codex/skills/
+
+# Claude Code
+cp -r skills/computer-control ~/.claude/skills/
+
+# OpenCode
+cp -r skills/computer-control ~/.config/opencode/skills/
+```
+
+### 方式 2：创建软链接
+
+macOS / Linux：
+
+```bash
+# Codex CLI
+ln -s "$(pwd)/skills/computer-control" ~/.codex/skills/computer-control
+
+# Claude Code
+ln -s "$(pwd)/skills/computer-control" ~/.claude/skills/computer-control
+
+# OpenCode
+ln -s "$(pwd)/skills/computer-control" ~/.config/opencode/skills/computer-control
+```
+
+Windows：
+
+```bat
+mklink /D "%USERPROFILE%\.codex\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.claude\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.config\opencode\skills\computer-control" "%CD%\skills\computer-control"
+```
+
+如果你正在频繁修改这个 Skill，优先使用软链接，这样不需要每次重新复制目录。

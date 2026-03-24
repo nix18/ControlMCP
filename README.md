@@ -168,7 +168,9 @@ The `skills/computer-control/` folder contains a ready-to-use Agent Skill that t
 
 ### Install the skill into your agent
 
-Copy `skills/computer-control/` into your agent's skill directory:
+You can either copy `skills/computer-control/` into your agent's skill directory, or add it via a symbolic link.
+
+Option 1: copy the directory
 
 ```bash
 # Codex CLI
@@ -180,6 +182,31 @@ cp -r skills/computer-control ~/.claude/skills/
 # OpenCode
 cp -r skills/computer-control ~/.config/opencode/skills/
 ```
+
+Option 2: create a symbolic link
+
+On macOS / Linux:
+
+```bash
+# Codex CLI
+ln -s "$(pwd)/skills/computer-control" ~/.codex/skills/computer-control
+
+# Claude Code
+ln -s "$(pwd)/skills/computer-control" ~/.claude/skills/computer-control
+
+# OpenCode
+ln -s "$(pwd)/skills/computer-control" ~/.config/opencode/skills/computer-control
+```
+
+On Windows (Command Prompt as Administrator when required):
+
+```bat
+mklink /D "%USERPROFILE%\.codex\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.claude\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.config\opencode\skills\computer-control" "%CD%\skills\computer-control"
+```
+
+Using a symbolic link is convenient while iterating on the skill, because changes in this repository are reflected immediately in the agent's skills directory.
 
 If your agent supports custom skill paths, you can also reference this folder directly.
 

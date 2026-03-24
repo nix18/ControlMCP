@@ -168,7 +168,9 @@ control-mcp
 
 ### 如何安装到 Agent
 
-把 `skills/computer-control/` 复制到对应 Agent 的技能目录：
+你可以选择“复制目录”或“创建软链接”两种方式，把 `skills/computer-control/` 加到对应 Agent 的技能目录。
+
+方式 1：复制目录
 
 ```bash
 # Codex CLI
@@ -180,6 +182,31 @@ cp -r skills/computer-control ~/.claude/skills/
 # OpenCode
 cp -r skills/computer-control ~/.config/opencode/skills/
 ```
+
+方式 2：创建软链接
+
+macOS / Linux：
+
+```bash
+# Codex CLI
+ln -s "$(pwd)/skills/computer-control" ~/.codex/skills/computer-control
+
+# Claude Code
+ln -s "$(pwd)/skills/computer-control" ~/.claude/skills/computer-control
+
+# OpenCode
+ln -s "$(pwd)/skills/computer-control" ~/.config/opencode/skills/computer-control
+```
+
+Windows（必要时以管理员身份运行命令提示符）：
+
+```bat
+mklink /D "%USERPROFILE%\.codex\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.claude\skills\computer-control" "%CD%\skills\computer-control"
+mklink /D "%USERPROFILE%\.config\opencode\skills\computer-control" "%CD%\skills\computer-control"
+```
+
+软链接方式更适合持续迭代 Skill，因为仓库里的修改会立即反映到 Agent 的技能目录。
 
 如果你的 Agent 支持自定义技能路径，也可以直接引用当前目录。
 
