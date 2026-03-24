@@ -142,18 +142,56 @@ See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 | [docs/FUNCTIONAL_DESIGN.md](docs/FUNCTIONAL_DESIGN.md) | Functional design |
 | [docs/TUTORIAL.md](docs/TUTORIAL.md) | Tutorial & examples |
 | [skills/computer-control/](skills/computer-control/) | Agent Skill: computer operation SOPs |
+| [skills/computer-control/README.md](skills/computer-control/README.md) | Skill-specific install and usage guide |
+| [skills/computer-control/docs/window-management.md](skills/computer-control/docs/window-management.md) | Window rescue and window shortcut reference |
+| [skills/computer-control/docs/idea-run-workflow.md](skills/computer-control/docs/idea-run-workflow.md) | JetBrains IDE run/log observation workflow |
 
 ## Agent Skill
 
-The `skills/computer-control/` folder contains a ready-to-use Agent Skill that teaches LLMs how to operate computers proficiently:
+The `skills/computer-control/` folder contains a ready-to-use Agent Skill that teaches LLMs how to operate computers proficiently.
 
-- **5 Golden Rules**: Keyboard-first, coordinate conversion, screenshot cost awareness, wait after action, verify before click
-- **7 Standard SOPs**: Window ops, screenshot-click, key sequences, compound ops, pixel verification, clipboard input, file navigation
-- **IDE Shortcut Tables**: IntelliJ IDEA, VS Code, Eclipse (40+ shortcuts)
-- **Browser/System Shortcuts**: 20+ browser shortcuts, Windows/macOS operations
-- **7 Common Pitfalls**: Coordinate confusion, DPI scaling, window occlusion, input method, dual monitors, etc.
+### What is included
 
-Copy `skills/computer-control/` to your Agent's skills directory to enable.
+- `SKILL.md`: the main skill instructions, SOPs, shortcut tables, and common failure patterns
+- `docs/coordinate-system.md`: coordinate conversion reference for screenshot-to-click workflows
+- `docs/window-management.md`: window maximize/restore/snap shortcuts and window recovery workflow
+- `docs/idea-run-workflow.md`: JetBrains IDE startup, run-panel switching, and log stabilization workflow
+- `README.md`: skill-local installation and usage notes
+
+### What the skill covers
+
+- **Keyboard-first automation**: prefer shortcuts over UI clicking whenever possible
+- **Window recovery**: fix minimized, half-screen, or partially restored windows before further actions
+- **Coordinate-safe clicking**: convert screenshot-local coordinates into screen coordinates explicitly
+- **IDE workflows**: IntelliJ IDEA / PyCharm run-configuration selection, run-panel switching, and log monitoring
+- **Operational fallback**: when JetBrains shortcuts do not behave as expected, check the local `ReferenceCard.pdf` or JetBrains official documentation
+
+### Install the skill into your agent
+
+Copy `skills/computer-control/` into your agent's skill directory:
+
+```bash
+# Codex CLI
+cp -r skills/computer-control ~/.codex/skills/
+
+# Claude Code
+cp -r skills/computer-control ~/.claude/skills/
+
+# OpenCode
+cp -r skills/computer-control ~/.config/opencode/skills/
+```
+
+If your agent supports custom skill paths, you can also reference this folder directly.
+
+### Use the skill
+
+After installation, invoke it naturally in prompts such as:
+
+- `Use $computer-control to restart the IDEA app and wait until logs stop updating`
+- `Use $computer-control to maximize the target window and capture it`
+- `Use $computer-control to operate PyCharm with keyboard shortcuts first`
+
+For skill-specific details, see [skills/computer-control/README.md](skills/computer-control/README.md).
 
 ## Project Structure
 
@@ -161,7 +199,7 @@ Copy `skills/computer-control/` to your Agent's skills directory to enable.
 ControlMCP/
 ├── README.md                          # This file
 ├── README.zh-CN.md                    # Chinese README
-├── LICENSE                            # MIT License
+├── LICENSE                            # GNU GPLv3 license
 ├── pyproject.toml                     # Package config
 ├── src/
 │   └── control_mcp/
@@ -188,8 +226,10 @@ ControlMCP/
 │   └── computer-control/              # Agent Skill: computer operation SOPs
 │       ├── SKILL.md                   # Main skill instructions
 │       ├── docs/
-│       │   └── coordinate-system.md   # Coordinate system reference
-│       └── README.md                  # Installation guide
+│       │   ├── coordinate-system.md   # Coordinate system reference
+│       │   ├── window-management.md   # Window management reference
+│       │   └── idea-run-workflow.md   # JetBrains IDE run/log workflow
+│       └── README.md                  # Skill install & usage guide
 ├── docs/
 │   ├── REQUIREMENTS.md
 │   ├── ARCHITECTURE.md
@@ -223,4 +263,4 @@ ControlMCP/
 
 ## License
 
-MIT
+GNU General Public License v3.0 (GPLv3)

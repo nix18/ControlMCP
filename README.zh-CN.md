@@ -141,6 +141,57 @@ control-mcp
 | [docs/zh-CN/MODULE_DESIGN.md](docs/zh-CN/MODULE_DESIGN.md) | 模块设计 |
 | [docs/zh-CN/FUNCTIONAL_DESIGN.md](docs/zh-CN/FUNCTIONAL_DESIGN.md) | 功能设计 |
 | [docs/zh-CN/TUTORIAL.md](docs/zh-CN/TUTORIAL.md) | 教程与示例 |
+| [skills/computer-control/](skills/computer-control/) | Agent Skill：电脑操作 SOP |
+| [skills/computer-control/README.md](skills/computer-control/README.md) | Skill 安装与使用说明 |
+| [skills/computer-control/docs/window-management.md](skills/computer-control/docs/window-management.md) | 窗口修复与窗口快捷键参考 |
+| [skills/computer-control/docs/idea-run-workflow.md](skills/computer-control/docs/idea-run-workflow.md) | JetBrains IDE 启动与日志观察流程 |
+
+## Agent Skill
+
+项目内置了一个可直接复用的 Agent Skill：`skills/computer-control/`。
+
+### Skill 包含内容
+
+- `SKILL.md`：主技能文档，包含操作法则、SOP、快捷键速查与常见误判
+- `docs/coordinate-system.md`：从截图坐标到屏幕点击坐标的换算说明
+- `docs/window-management.md`：窗口最大化、恢复、分屏与窗口救援流程
+- `docs/idea-run-workflow.md`：JetBrains IDE 启动配置、切换 Run 面板、判断日志稳定的流程
+- `README.md`：Skill 局部安装与使用说明
+
+### Skill 能解决什么
+
+- 键盘优先的桌面自动化
+- 窗口被最小化、半屏、布局异常时的修复
+- 精确点击前的坐标换算
+- IntelliJ IDEA / PyCharm 的运行配置选择、Run 面板切换与日志停止更新判定
+- JetBrains 快捷键与点击行为不达预期时的官方资料兜底
+
+### 如何安装到 Agent
+
+把 `skills/computer-control/` 复制到对应 Agent 的技能目录：
+
+```bash
+# Codex CLI
+cp -r skills/computer-control ~/.codex/skills/
+
+# Claude Code
+cp -r skills/computer-control ~/.claude/skills/
+
+# OpenCode
+cp -r skills/computer-control ~/.config/opencode/skills/
+```
+
+如果你的 Agent 支持自定义技能路径，也可以直接引用当前目录。
+
+### 如何使用
+
+安装后，可以直接在提示词里这样使用：
+
+- `使用 $computer-control 重启 IDEA 中的应用，并等待日志停止更新`
+- `使用 $computer-control 最大化目标窗口后截图`
+- `使用 $computer-control 优先通过快捷键操作 PyCharm`
+
+Skill 的详细说明可继续阅读 [skills/computer-control/README.md](skills/computer-control/README.md)。
 
 ## 项目结构
 
@@ -148,7 +199,7 @@ control-mcp
 ControlMCP/
 ├── README.md                          # 英文版
 ├── README.zh-CN.md                    # 本文件
-├── LICENSE                            # MIT 许可证
+├── LICENSE                            # GNU GPLv3 许可证
 ├── pyproject.toml                     # 包配置
 ├── src/
 │   └── control_mcp/
@@ -171,6 +222,14 @@ ControlMCP/
 │           ├── _win_window.py         # Windows 后端
 │           ├── _mac_window.py         # macOS 后端
 │           └── _linux_window.py       # Linux 后端
+├── skills/
+│   └── computer-control/              # Agent Skill：电脑操作 SOP
+│       ├── SKILL.md                   # 主技能文档
+│       ├── docs/
+│       │   ├── coordinate-system.md   # 坐标体系参考
+│       │   ├── window-management.md   # 窗口管理参考
+│       │   └── idea-run-workflow.md   # JetBrains IDE 启动与日志流程
+│       └── README.md                  # Skill 安装与使用说明
 ├── docs/
 │   ├── REQUIREMENTS.md                # 英文需求分析
 │   ├── ARCHITECTURE.md                # 英文架构设计
@@ -204,4 +263,4 @@ ControlMCP/
 
 ## 许可证
 
-MIT
+GNU General Public License v3.0（GPLv3）

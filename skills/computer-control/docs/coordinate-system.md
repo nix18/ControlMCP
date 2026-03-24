@@ -1,8 +1,14 @@
 # 坐标系统参考
 
+> 这份文档只回答一个问题：如何把“截图里看到的位置”稳定地转成 ControlMCP 可点击的屏幕坐标。
+
 ## 核心概念
 
 ControlMCP 使用 **屏幕绝对坐标系**。所有 `mouse_click`、`mouse_move`、`mouse_drag` 的参数都是屏幕坐标。
+
+前提提醒：
+- 先保证目标窗口真的处于可操作状态
+- 如果窗口被最小化、半屏或尺寸异常，先按 [window-management.md](./window-management.md) 做窗口修正
 
 ## 坐标系示意
 
@@ -89,6 +95,20 @@ screen_y = 截图左上角的屏幕Y + 按钮在截图中的Y
 | `capture_window` | `window_x`, `window_y` |
 | `capture_screen` | `x`, `y`（通常为 0,0） |
 | `capture_region` | 传入的 `x`, `y` 参数 |
+
+## 点击前检查
+
+在真正点击前，至少确认下面三件事：
+
+1. 截图来源是什么：`capture_window`、`capture_screen` 还是 `capture_region`
+2. 窗口是否被最大化或处在你预期的布局
+3. 识别到的坐标是截图内坐标，不是屏幕坐标
+
+推荐顺序：
+
+```text
+窗口修正 → 截图 → 识别局部坐标 → 计算屏幕坐标 → 点击
+```
 
 ## 常见 UI 元素尺寸参考
 
