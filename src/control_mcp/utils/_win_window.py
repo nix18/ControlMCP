@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ctypes
 from typing import Any
 
 import pygetwindow as gw
@@ -34,9 +35,14 @@ def focus_window(title: str) -> bool:
     if not matches:
         return False
     w = matches[0]
-    if w.isMinimized:
-        w.restore()
-    w.activate()
+    try:
+        if w.isMinimized:
+            w.restore()
+        w.activate()
+    except gw.PyGetWindowException:
+        # pygetwindow may throw even on success (error code 0).
+        # Fall back to raw Win32 API.
+        _force_foreground(w._hWnd)
     return True
 
 
@@ -63,3 +69,35 @@ def find_and_get_geometry(title: str) -> dict[str, Any] | None:
 def _find(title: str) -> list[gw.Win32Window]:
     needle = title.lower()
     return [w for w in gw.getAllWindows() if w.title and needle in w.title.lower()]
+
+
+def _force_foreground(hwnd: int) -> None:
+    """Force a window to the foreground using Win32 API directly.
+
+    Handles cases where SetForegroundWindow is restricted (e.g. background
+    process trying to steal focus). Uses AttachThreadInput as a workaround.
+    """
+    user32 = ctypes.windll.user32
+
+    # If minimized, restore first
+    if user32.IsIconic(hwnd):
+        user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+
+    # Try direct SetForegroundWindow first
+    if user32.SetForegroundWindow(hwnd):
+        return
+
+    # Fallback: attach our thread to the foreground thread
+    current_tid = user32.GetCurrentThreadId()
+    foreground_hwnd = user32.GetForegroundWindow()
+    foreground_tid = user32.GetWindowThreadProcessId(foreground_hwnd, None)
+
+    if current_tid != foreground_tid:
+        user32.AttachThreadInput(current_tid, foreground_tid, True)
+        try:
+            user32.SetForegroundWindow(hwnd)
+            user32.BringWindowToTop(hwnd)
+        finally:
+            user32.AttachThreadInput(current_tid, foreground_tid, False)
+    else:
+        user32.BringWindowToTop(hwnd)
