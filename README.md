@@ -20,7 +20,7 @@ ControlMCP is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
 install from source:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/nix18/ControlMCP.git
 cd ControlMCP
 pip install -e .
 ```
