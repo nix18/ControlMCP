@@ -13,17 +13,11 @@
 
 ControlMCP 是一个 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，赋予 LLM **查看和控制电脑**的能力 — 截图、管理窗口、移动/点击鼠标、键盘输入，并将这些操作串联为复杂的自动化工作流。
 
-设计为 **pip 安装** 和 **一键启动**。
-
 ## 快速开始
 
 ### 安装
 
-```bash
-pip install control-mcp
-```
-
-或从源码安装：
+从源码安装：
 
 ```bash
 git clone <repo-url>

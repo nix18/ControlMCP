@@ -13,17 +13,11 @@
 
 ControlMCP is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that gives LLMs the ability to **see and control a computer** — take screenshots, manage windows, move/click the mouse, type on the keyboard, and chain all of these into complex automation workflows.
 
-It is designed to be **pip-installable** and **one-command startable**.
-
 ## Quick Start
 
 ### Installation
 
-```bash
-pip install control-mcp
-```
-
-Or install from source:
+install from source:
 
 ```bash
 git clone <repo-url>
