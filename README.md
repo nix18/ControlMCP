@@ -13,6 +13,8 @@
 
 ControlMCP is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that gives LLMs the ability to **see and control a computer** — take screenshots, manage windows, move/click the mouse, type on the keyboard, and chain all of these into complex automation workflows.
 
+The repository also ships with a reusable agent skill at [skills/computer-control/](skills/computer-control/). It packages desktop-operation SOPs, shortcut guidance, JetBrains IDE workflows, and screenshot-to-click coordinate rules for agents that support skills.
+
 ## Quick Start
 
 ### Installation

@@ -13,6 +13,8 @@
 
 ControlMCP 是一个 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，赋予 LLM **查看和控制电脑**的能力 — 截图、管理窗口、移动/点击鼠标、键盘输入，并将这些操作串联为复杂的自动化工作流。
 
+仓库同时内置了可直接复用的 Agent Skill：[skills/computer-control/](skills/computer-control/)。它把桌面操作 SOP、快捷键经验、JetBrains IDE 工作流以及截图坐标到点击坐标的换算规则打包好了，适合支持 skills 的 Agent 直接接入使用。
+
 ## 快速开始
 
 ### 安装
