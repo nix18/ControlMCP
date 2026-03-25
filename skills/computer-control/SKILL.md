@@ -359,6 +359,26 @@ capture_scroll_region(x, y, width, height, scroll_distance, quality?)
 | 地址栏 | `Ctrl+L` |
 | 页面查找 | `Ctrl+F` |
 
+### Chrome MCP 遇到人机验证
+
+当 `chrome-devtools` / Chrome MCP 页面出现“确认你是真人”或 Cloudflare Turnstile 一类验证框时，不要只依赖 DOM 快照继续盲点。
+
+推荐流程：
+
+```text
+1. 保持浏览器窗口前台，不要立即刷新
+2. 用 control-mcp 的 capture_window / capture_region 截图确认验证框真实位置
+3. 必要时加 grid_rows + grid_cols，先在网格图上定位复选框或按钮
+4. 用 resolve_grid_target 或直接换算坐标后，调用 mouse_click
+5. wait(1-2s) 后再回到 chrome-devtools 继续观察页面是否通过验证
+```
+
+补充原则：
+- `chrome-devtools` 负责读页面结构和后续导航，`control-mcp` 负责处理这类需要真实屏幕点击的验证控件
+- 先截图再点击，避免直接猜测 Cloudflare 复选框位置
+- 如果验证框在 iframe 内、DOM 能看到但点击无效，优先切到 `control-mcp` 走屏幕级点击
+- 完成验证后再回到 `chrome-devtools_take_snapshot` 或 `wait_for` 检查页面是否恢复正常
+
 ## 常见误判
 
 ### 1. 目标已经打开，却又回到全局搜索
