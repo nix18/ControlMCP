@@ -50,7 +50,7 @@ control-mcp
 }
 ```
 
-## 工具列表（共 31 个）
+## 工具列表（共 33 个）
 
 ### 控制平面
 
@@ -71,6 +71,8 @@ control-mcp
 | `capture_region` | 区域截图（x, y, 宽, 高） |
 | `capture_scroll_region` | 在固定区域内滚动并拼接成长截图 |
 | `get_screen_info` | 列出所有显示器及其分辨率 |
+| `resolve_grid_target` | 将网格编号 + 锚点换算成精确屏幕坐标 |
+| `click_grid_target` | 直接用截图网格元数据解析并点击 |
 
 ### 窗口管理
 
@@ -152,6 +154,10 @@ ControlMCP 现在支持“控制平面优先”的桌面自动化工作流：
 4. 对关键步骤做验证，并在上下文丢失时恢复
 5. 对支付、密码、资产类动作强制要求显式确认
 6. 把成功经验沉淀下来供后续复用
+
+对于目标很小或视觉定位不稳定的点击，还可以给 `capture_screen`、`capture_region`、
+`capture_window` 传入 `grid_rows` 和 `grid_cols`，同时生成一张 `grid_file_path`
+网格图，再用 `resolve_grid_target` 把“网格编号 + 锚点”换算成更稳定的点击坐标。
 
 ## 文档
 

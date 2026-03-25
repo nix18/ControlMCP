@@ -20,6 +20,8 @@ def _atomic_tools() -> list[Tool]:
                     "monitor": {"type": "integer"},
                     "quality": {"type": "integer", "default": 80},
                     "max_width": {"type": "integer"},
+                    "grid_rows": {"type": "integer"},
+                    "grid_cols": {"type": "integer"},
                 },
             },
         ),
@@ -36,6 +38,8 @@ def _atomic_tools() -> list[Tool]:
                     "save_dir": {"type": "string"},
                     "quality": {"type": "integer", "default": 80},
                     "max_width": {"type": "integer"},
+                    "grid_rows": {"type": "integer"},
+                    "grid_cols": {"type": "integer"},
                 },
                 "required": ["x", "y", "width", "height"],
             },
@@ -96,8 +100,93 @@ def _atomic_tools() -> list[Tool]:
                     "save_dir": {"type": "string"},
                     "quality": {"type": "integer", "default": 80},
                     "max_width": {"type": "integer"},
+                    "grid_rows": {"type": "integer"},
+                    "grid_cols": {"type": "integer"},
                 },
                 "required": ["title"],
+            },
+        ),
+        Tool(
+            name="resolve_grid_target",
+            description=(
+                "Resolve a grid cell and anchor from a screenshot into screen-absolute "
+                "coordinates for precise clicking."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "base_x": {"type": "integer"},
+                    "base_y": {"type": "integer"},
+                    "image_width": {"type": "integer"},
+                    "image_height": {"type": "integer"},
+                    "grid_rows": {"type": "integer"},
+                    "grid_cols": {"type": "integer"},
+                    "cell": {"type": "integer"},
+                    "anchor": {
+                        "type": "string",
+                        "enum": [
+                            "center",
+                            "top_left",
+                            "top",
+                            "top_right",
+                            "right",
+                            "bottom_right",
+                            "bottom",
+                            "bottom_left",
+                            "left",
+                        ],
+                        "default": "center",
+                    },
+                },
+                "required": [
+                    "base_x",
+                    "base_y",
+                    "image_width",
+                    "image_height",
+                    "grid_rows",
+                    "grid_cols",
+                    "cell",
+                ],
+            },
+        ),
+        Tool(
+            name="click_grid_target",
+            description=(
+                "Use grid metadata from a screenshot response to resolve and directly "
+                "move or click the target cell anchor."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "capture": {"type": "object"},
+                    "cell": {"type": "integer"},
+                    "anchor": {
+                        "type": "string",
+                        "enum": [
+                            "center",
+                            "top_left",
+                            "top",
+                            "top_right",
+                            "right",
+                            "bottom_right",
+                            "bottom",
+                            "bottom_left",
+                            "left",
+                        ],
+                        "default": "center",
+                    },
+                    "button": {
+                        "type": "string",
+                        "enum": ["left", "right", "middle"],
+                        "default": "left",
+                    },
+                    "clicks": {"type": "integer", "default": 1},
+                    "move_only": {"type": "boolean", "default": False},
+                    "duration": {"type": "number", "default": 0.25},
+                    "risk_context": {"type": "string"},
+                    "confirmation_token": {"type": "string"},
+                },
+                "required": ["capture", "cell"],
             },
         ),
         Tool(

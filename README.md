@@ -50,7 +50,7 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 }
 ```
 
-## Tools (31 total)
+## Tools (33 total)
 
 ### Control Plane
 
@@ -71,6 +71,8 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 | `capture_region` | Region screenshot (x, y, width, height) |
 | `capture_scroll_region` | Stitch a long screenshot while scrolling inside a fixed region |
 | `get_screen_info` | List all monitors with resolution |
+| `resolve_grid_target` | Convert a grid cell + anchor into precise screen coordinates |
+| `click_grid_target` | Resolve screenshot grid metadata and click directly |
 
 ### Window Management
 
@@ -153,6 +155,10 @@ ControlMCP now supports a control-plane-first workflow for higher precision desk
 4. Verify each critical step and recover when context is lost
 5. Require explicit confirmation for payment/password/asset-related actions
 6. Save successful workflow experience for future runs
+
+For small or visually ambiguous targets, you can also ask `capture_screen`, `capture_region`,
+or `capture_window` to generate a second `grid_file_path` overlay image with `grid_rows` and
+`grid_cols`, then convert a chosen cell + anchor through `resolve_grid_target` before clicking.
 
 ## Documentation
 

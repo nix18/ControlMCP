@@ -50,6 +50,7 @@ class DesktopTaskPlan:
     status: str = "ready"
     target_window: str | None = None
     risk_reasons: list[str] = field(default_factory=list)
+    strategy_hints: list[dict[str, Any]] = field(default_factory=list)
     steps: list[PlanStep] = field(default_factory=list)
     created_at: str = field(default_factory=_now_iso)
 

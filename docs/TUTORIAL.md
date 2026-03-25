@@ -95,6 +95,43 @@ tool: capture_region
 args: {"x": 100, "y": 200, "width": 800, "height": 600}
 ```
 
+### Capture with an overlay grid for precise clicking
+
+```
+tool: capture_window
+args: {"title": "Chrome", "grid_rows": 3, "grid_cols": 4}
+```
+
+This returns the normal screenshot plus a `grid_file_path` image.
+After visually choosing a cell and anchor, resolve the click target:
+
+```
+tool: resolve_grid_target
+args: {
+  "base_x": 286,
+  "base_y": 22,
+  "image_width": 1404,
+  "image_height": 990,
+  "grid_rows": 3,
+  "grid_cols": 4,
+  "cell": 6,
+  "anchor": "center"
+}
+```
+
+Supported anchors: `center`, `top_left`, `top`, `top_right`, `right`, `bottom_right`, `bottom`, `bottom_left`, `left`.
+
+You can also click directly from the screenshot response payload:
+
+```
+tool: click_grid_target
+args: {
+  "capture": {"window_x": 286, "window_y": 22, "screenshot_width": 1404, "screenshot_height": 990, "grid_rows": 3, "grid_cols": 4},
+  "cell": 6,
+  "anchor": "center"
+}
+```
+
 ### Capture second monitor
 
 Captures a specific monitor by index and saves to a custom directory.

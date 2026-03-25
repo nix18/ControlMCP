@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from control_mcp.tools.actions import tool_hotkey
+from control_mcp.tools.actions import tool_hotkey, tool_wait
+from control_mcp.tools.keyboard import tool_key_press
 from control_mcp.tools.screen import tool_capture_screen
 from control_mcp.tools.window import tool_capture_window, tool_focus_window, tool_list_windows
 
@@ -22,6 +23,28 @@ def recover_execution_context(
         results.append(_parse(tool_capture_screen(quality=75, max_width=960)))
         return {"success": True, "strategy": strategy, "results": results}
 
+    if strategy == "occlusion_rescue":
+        if target_window:
+            results.append(_parse(tool_focus_window(target_window)))
+            results.append(_parse(tool_hotkey("win", "up")))
+            results.append(_parse(tool_capture_window(target_window, quality=75, max_width=960)))
+            return {"success": True, "strategy": strategy, "results": results}
+        results.append(_parse(tool_hotkey("win", "d")))
+        results.append(_parse(tool_capture_screen(quality=75, max_width=960)))
+        return {"success": True, "strategy": strategy, "results": results}
+
+    if strategy in {"windows_tray_restore", "wechat_tray_restore"}:
+        results.append(_parse(tool_hotkey("win", "b")))
+        results.append(_parse(tool_wait(0.5)))
+        results.append(_parse(tool_key_press(["enter"])))
+        results.append(_parse(tool_wait(0.35)))
+        if target_window:
+            results.append(_parse(tool_focus_window(target_window)))
+            results.append(_parse(tool_capture_window(target_window, quality=75, max_width=960)))
+        else:
+            results.append(_parse(tool_capture_screen(quality=75, max_width=960)))
+        return {"success": True, "strategy": strategy, "results": results}
+
     if target_window:
         results.append(_parse(tool_focus_window(target_window)))
         results.append(_parse(tool_hotkey("win", "up")))
@@ -37,6 +60,7 @@ def suggest_recovery(target_window: str | None = None) -> list[str]:
     suggestions = [
         "重新截图并从当前真实界面重新规划。",
         "先做窗口救援，再继续操作。",
+        "Windows 快捷键不确定时，参考 Microsoft 官方文档。",
     ]
     if target_window:
         suggestions.insert(0, f"尝试重新聚焦并最大化窗口: {target_window}")

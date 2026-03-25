@@ -148,6 +148,11 @@ def _execute_step(step, target_window: str | None) -> StepExecutionResult:
                 rounds=step.args.get("rounds", 2),
                 interval_seconds=step.args.get("interval_seconds", 1.0),
             )
+        elif step.action == "recover_execution_context":
+            payload = recover_execution_context(
+                strategy=step.args.get("strategy", "window_rescue"),
+                target_window=step.args.get("target_window") or target_window,
+            )
         elif step.action == "request_confirmation":
             payload = {
                 "success": False,

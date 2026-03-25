@@ -45,11 +45,16 @@ class TestScreenshotResult:
             x=0,
             y=0,
             monitor_index=1,
+            grid_file_path="/tmp/test_grid.png",
+            grid_rows=3,
+            grid_cols=4,
+            grid_numbering="row-major-1-based",
         )
         d = r.to_dict()
         assert d["file_path"] == "/tmp/test.png"
         assert d["width"] == 1920
         assert d["monitor_index"] == 1
+        assert d["grid_rows"] == 3
 
     def test_defaults(self):
         r = ScreenshotResult(
@@ -87,6 +92,26 @@ class TestWindowScreenshotResult:
         j = json.loads(r.to_json())
         assert j["window_title"] == "Notepad"
         assert j["window_x"] == 100
+
+    def test_grid_fields(self):
+        r = WindowScreenshotResult(
+            file_path="/tmp/win.png",
+            timestamp="t",
+            window_title="Notepad",
+            window_x=100,
+            window_y=200,
+            window_width=800,
+            window_height=600,
+            screenshot_width=800,
+            screenshot_height=600,
+            grid_file_path="/tmp/win_grid.png",
+            grid_rows=4,
+            grid_cols=5,
+            grid_numbering="row-major-1-based",
+        )
+        j = json.loads(r.to_json())
+        assert j["grid_file_path"].endswith("grid.png")
+        assert j["grid_cols"] == 5
 
 
 class TestWindowInfo:

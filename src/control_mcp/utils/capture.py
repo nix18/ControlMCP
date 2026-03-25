@@ -11,7 +11,7 @@ from typing import Any
 
 import mss
 import pyautogui
-from PIL import Image, ImageChops, ImageStat
+from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageStat
 
 from control_mcp.schemas.responses import (
     MonitorInfo,
@@ -27,6 +27,7 @@ from control_mcp.schemas.responses import (
 
 _DEFAULT_DIR = Path(tempfile.gettempdir()) / "control_mcp_screenshots"
 _DEFAULT_SCROLL_CHUNK = 120
+_GRID_NUMBERING = "row-major-1-based"
 
 
 def _ensure_dir(path: Path) -> Path:
@@ -54,6 +55,77 @@ def _capture_region_image(x: int, y: int, width: int, height: int) -> Image.Imag
     with mss.mss() as sct:
         raw = sct.grab(region)
     return Image.frombytes("RGB", raw.size, raw.bgra, "raw", "BGRX")
+
+
+def _normalize_grid(rows: int | None, cols: int | None) -> tuple[int | None, int | None]:
+    if rows is None and cols is None:
+        return None, None
+    if rows is None or cols is None:
+        raise ValueError("grid_rows and grid_cols must be provided together")
+    if rows <= 0 or cols <= 0:
+        raise ValueError("grid_rows and grid_cols must be positive")
+    return rows, cols
+
+
+def _grid_suffix(filename: str) -> str:
+    stem = Path(filename).stem
+    return f"{stem}_grid.png"
+
+
+def _draw_grid_overlay(img: Image.Image, rows: int, cols: int) -> Image.Image:
+    overlay = img.copy()
+    draw = ImageDraw.Draw(overlay)
+    font = ImageFont.load_default()
+    width, height = overlay.size
+    cell_w = width / cols
+    cell_h = height / rows
+    line_color = (0, 255, 255)
+    text_fill = (255, 255, 255)
+    bg_fill = (0, 0, 0)
+    line_width = max(1, round(min(width, height) / 400))
+    inset = max(4, round(min(cell_w, cell_h) * 0.08))
+
+    for row in range(rows + 1):
+        y = round(row * cell_h)
+        draw.line([(0, y), (width, y)], fill=line_color, width=line_width)
+    for col in range(cols + 1):
+        x = round(col * cell_w)
+        draw.line([(x, 0), (x, height)], fill=line_color, width=line_width)
+
+    for row in range(rows):
+        for col in range(cols):
+            cell_index = row * cols + col + 1
+            x0 = round(col * cell_w)
+            y0 = round(row * cell_h)
+            label = str(cell_index)
+            bbox = draw.textbbox((0, 0), label, font=font)
+            text_w = bbox[2] - bbox[0]
+            text_h = bbox[3] - bbox[1]
+            box = [
+                x0 + inset,
+                y0 + inset,
+                x0 + inset + text_w + 8,
+                y0 + inset + text_h + 6,
+            ]
+            draw.rectangle(box, fill=bg_fill)
+            draw.text((box[0] + 4, box[1] + 3), label, fill=text_fill, font=font)
+
+    return overlay
+
+
+def _save_grid_overlay(
+    img: Image.Image,
+    save_path: Path,
+    filename: str,
+    rows: int | None,
+    cols: int | None,
+) -> str | None:
+    if rows is None or cols is None:
+        return None
+    overlay = _draw_grid_overlay(img, rows, cols)
+    grid_path = save_path / _grid_suffix(filename)
+    overlay.save(str(grid_path), "PNG")
+    return str(grid_path)
 
 
 def _prepare_match_image(img: Image.Image) -> Image.Image:
@@ -178,6 +250,8 @@ def capture_full_screen(
     monitor_index: int | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> ScreenshotResult:
     """Capture the full screen (or a specific monitor).
 
@@ -194,6 +268,7 @@ def capture_full_screen(
         Useful for reducing token cost when LLM analyzes the screenshot.
     """
     save_path = _ensure_dir(Path(save_dir) if save_dir else _DEFAULT_DIR)
+    grid_rows, grid_cols = _normalize_grid(grid_rows, grid_cols)
 
     with mss.mss() as sct:
         mon = sct.monitors[monitor_index] if monitor_index is not None else sct.monitors[0]
@@ -208,6 +283,7 @@ def capture_full_screen(
             region=(mon["left"], mon["top"], mon["width"], mon["height"]),
         )
         filepath, file_size = _save_image(img, save_path, filename, quality)
+        grid_file_path = _save_grid_overlay(img, save_path, filename, grid_rows, grid_cols)
 
         return ScreenshotResult(
             file_path=str(filepath),
@@ -219,6 +295,10 @@ def capture_full_screen(
             monitor_index=monitor_index,
             file_size=file_size,
             quality=quality,
+            grid_file_path=grid_file_path,
+            grid_rows=grid_rows,
+            grid_cols=grid_cols,
+            grid_numbering=_GRID_NUMBERING if grid_file_path else None,
         )
 
 
@@ -230,6 +310,8 @@ def capture_region(
     save_dir: str | Path | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> ScreenshotResult:
     """Capture a rectangular region of the screen.
 
@@ -247,6 +329,7 @@ def capture_region(
         If set, scale image down to this max width.
     """
     save_path = _ensure_dir(Path(save_dir) if save_dir else _DEFAULT_DIR)
+    grid_rows, grid_cols = _normalize_grid(grid_rows, grid_cols)
 
     img = _capture_region_image(x, y, width, height)
     img, _ = _resize_if_needed(img, max_width)
@@ -256,6 +339,7 @@ def capture_region(
         region=(x, y, width, height),
     )
     filepath, file_size = _save_image(img, save_path, filename, quality)
+    grid_file_path = _save_grid_overlay(img, save_path, filename, grid_rows, grid_cols)
 
     return ScreenshotResult(
         file_path=str(filepath),
@@ -266,6 +350,10 @@ def capture_region(
         y=y,
         file_size=file_size,
         quality=quality,
+        grid_file_path=grid_file_path,
+        grid_rows=grid_rows,
+        grid_cols=grid_cols,
+        grid_numbering=_GRID_NUMBERING if grid_file_path else None,
     )
 
 
@@ -310,9 +398,12 @@ def capture_scroll_region(
         new_part = _extract_new_scrolled_part(previous, current, scroll_down=scroll_down)
 
         if new_part is None or new_part.height < 8:
-            if _mean_image_difference(
-                _prepare_match_image(previous), _prepare_match_image(current)
-            ) < 0.5:
+            if (
+                _mean_image_difference(
+                    _prepare_match_image(previous), _prepare_match_image(current)
+                )
+                < 0.5
+            ):
                 break
 
             fallback_boundary = current.height // 2
@@ -436,6 +527,8 @@ def capture_window(
     save_dir: str | Path | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> WindowScreenshotResult:
     """Capture the first window whose title contains *title* (case-insensitive).
 
@@ -459,6 +552,7 @@ def capture_window(
     """
     backend = _get_platform_window_backend()
     save_path = _ensure_dir(Path(save_dir) if save_dir else _DEFAULT_DIR)
+    grid_rows, grid_cols = _normalize_grid(grid_rows, grid_cols)
 
     win = backend.find_and_get_geometry(title)
     if win is None:
@@ -491,6 +585,7 @@ def capture_window(
             region=(win["x"], win["y"], win["width"], win["height"]),
         )
         filepath, file_size = _save_image(img, save_path, filename, quality)
+        grid_file_path = _save_grid_overlay(img, save_path, filename, grid_rows, grid_cols)
 
         return WindowScreenshotResult(
             file_path=str(filepath),
@@ -504,4 +599,8 @@ def capture_window(
             screenshot_height=img.height,
             file_size=file_size,
             quality=quality,
+            grid_file_path=grid_file_path,
+            grid_rows=grid_rows,
+            grid_cols=grid_cols,
+            grid_numbering=_GRID_NUMBERING if grid_file_path else None,
         )

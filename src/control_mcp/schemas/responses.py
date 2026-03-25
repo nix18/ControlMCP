@@ -45,6 +45,10 @@ class ScreenshotResult:
     monitor_index: int | None = None
     file_size: int = 0  # bytes
     quality: int = 80  # JPEG quality (100 = PNG lossless)
+    grid_file_path: str | None = None
+    grid_rows: int | None = None
+    grid_cols: int | None = None
+    grid_numbering: str | None = None
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False, default=str)
@@ -68,6 +72,10 @@ class WindowScreenshotResult:
     screenshot_height: int
     file_size: int = 0
     quality: int = 80
+    grid_file_path: str | None = None
+    grid_rows: int | None = None
+    grid_cols: int | None = None
+    grid_numbering: str | None = None
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False, default=str)

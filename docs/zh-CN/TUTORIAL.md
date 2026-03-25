@@ -81,6 +81,43 @@ tool: capture_region
 args: {"x": 100, "y": 200, "width": 800, "height": 600}
 ```
 
+### 生成带网格的辅助截图，用于精确点击
+
+```
+tool: capture_window
+args: {"title": "Chrome", "grid_rows": 3, "grid_cols": 4}
+```
+
+这会同时返回原图和 `grid_file_path` 网格图。
+当你在网格图里确定了目标格子和锚点后，再这样换算点击坐标：
+
+```
+tool: resolve_grid_target
+args: {
+  "base_x": 286,
+  "base_y": 22,
+  "image_width": 1404,
+  "image_height": 990,
+  "grid_rows": 3,
+  "grid_cols": 4,
+  "cell": 6,
+  "anchor": "center"
+}
+```
+
+支持的锚点：`center`、`top_left`、`top`、`top_right`、`right`、`bottom_right`、`bottom`、`bottom_left`、`left`。
+
+如果你已经拿到了截图响应对象，也可以直接点击：
+
+```
+tool: click_grid_target
+args: {
+  "capture": {"window_x": 286, "window_y": 22, "screenshot_width": 1404, "screenshot_height": 990, "grid_rows": 3, "grid_cols": 4},
+  "cell": 6,
+  "anchor": "center"
+}
+```
+
 ### 截取第二个显示器
 
 按索引截取指定显示器，并保存到自定义目录。

@@ -96,6 +96,60 @@ screen_y = 截图左上角的屏幕Y + 按钮在截图中的Y
 | `capture_screen` | `x`, `y`（通常为 0,0） |
 | `capture_region` | 传入的 `x`, `y` 参数 |
 
+## 网格辅助点击（推荐用于小目标）
+
+如果目标很小，或者模型多次点击偏移，优先启用网格辅助截图。
+
+### 第一步：生成网格图
+
+```text
+capture_window(title="目标窗口", grid_rows=3, grid_cols=4)
+```
+
+返回里会同时包含：
+- `file_path`：原图
+- `grid_file_path`：带网格的辅助图
+- `grid_rows` / `grid_cols`
+
+### 第二步：让模型只描述“格子 + 锚点”
+
+例如：
+
+```text
+第 6 格的中心
+第 8 格的右边
+第 3 格的右上角
+```
+
+### 第三步：换算成屏幕坐标
+
+```text
+resolve_grid_target(
+  base_x=window_x,
+  base_y=window_y,
+  image_width=screenshot_width,
+  image_height=screenshot_height,
+  grid_rows=3,
+  grid_cols=4,
+  cell=6,
+  anchor="center"
+)
+```
+
+### 支持的锚点
+
+| 锚点 | 说明 |
+|------|------|
+| `center` | 格子中心 |
+| `top_left` | 左上角内缩点 |
+| `top` | 上边中点内缩 |
+| `top_right` | 右上角内缩点 |
+| `right` | 右边中点内缩 |
+| `bottom_right` | 右下角内缩点 |
+| `bottom` | 下边中点内缩 |
+| `bottom_left` | 左下角内缩点 |
+| `left` | 左边中点内缩 |
+
 ## 点击前检查
 
 在真正点击前，至少确认下面三件事：

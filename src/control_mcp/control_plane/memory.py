@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from control_mcp.control_plane.strategies import match_builtin_strategies
 from control_mcp.domain.models import WorkflowExperience, new_id
 
 _STORE_DIR = Path(tempfile.gettempdir()) / "control_mcp_memory"
@@ -61,3 +62,30 @@ def list_experiences(limit: int = 20, intent: str | None = None) -> list[dict[st
             continue
         rows.append(row)
     return rows[-limit:]
+
+
+def collect_strategy_hints(instruction: str, app: str | None = None) -> list[dict[str, Any]]:
+    """Return dual-layer strategy hints from built-in rules and stored experience."""
+    hints = list(match_builtin_strategies(instruction, app=app))
+    seen_ids = {hint.get("id") for hint in hints}
+    lower = instruction.lower()
+    for row in reversed(list_experiences(limit=50)):
+        haystack = " ".join(
+            [
+                str(row.get("instruction", "")),
+                str(row.get("summary", "")),
+                str(row.get("app", "")),
+            ]
+        ).lower()
+        if (
+            lower
+            and lower not in haystack
+            and not any(token in haystack for token in lower.split())
+        ):
+            continue
+        memory_hint = {"id": row.get("experience_id"), "layer": "memory", **row}
+        if memory_hint["id"] in seen_ids:
+            continue
+        seen_ids.add(memory_hint["id"])
+        hints.append(memory_hint)
+    return hints

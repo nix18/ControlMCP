@@ -30,19 +30,23 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[TextConten
     return [TextContent(type="text", text=result)]
 
 
-async def main() -> None:
+async def _main_async() -> None:
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
-def run() -> None:
+def main() -> None:
     import asyncio
 
-    asyncio.run(main())
+    asyncio.run(_main_async())
+
+
+def run() -> None:
+    main()
 
 
 if __name__ == "__main__":
     try:
-        run()
+        main()
     except KeyboardInterrupt:
         sys.exit(0)

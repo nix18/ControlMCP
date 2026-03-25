@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from control_mcp.control_plane.guards import assess_tool_risk
+from control_mcp.control_plane.memory import collect_strategy_hints
 from control_mcp.domain.models import DesktopTaskPlan, PlanStep, new_id
 
 _PLANS: dict[str, DesktopTaskPlan] = {}
@@ -25,11 +26,17 @@ def _extract_target_window(instruction: str) -> str | None:
         match = re.search(pattern, instruction, re.IGNORECASE)
         if match:
             return match.group(1).strip()
+    if "微信" in instruction.lower() or "wechat" in instruction.lower():
+        return "微信"
     return None
 
 
 def _intent_and_confidence(instruction: str) -> tuple[str, float]:
     lower = instruction.lower()
+    if any(keyword in lower for keyword in ["托盘", "后台驻留", "通知区域", "tray"]):
+        return "restore_tray_application", 0.9
+    if any(keyword in lower for keyword in ["遮挡", "挡住", "被其他窗口盖住", "occluded"]):
+        return "recover_window_visibility", 0.82
     if any(keyword in lower for keyword in ["截图", "capture", "screenshot", "截屏"]):
         return "capture_information", 0.9
     if any(keyword in lower for keyword in ["滚动", "scroll", "聊天记录", "长截图"]):
@@ -57,6 +64,35 @@ def _needs_observation(intent: str, target_window: str | None) -> bool:
 
 def _build_steps(normalized: str, intent: str, target_window: str | None) -> list[PlanStep]:
     steps: list[PlanStep] = []
+
+    if intent == "restore_tray_application":
+        strategy = "wechat_tray_restore" if target_window == "微信" else "windows_tray_restore"
+        steps.append(
+            PlanStep(
+                id=new_id("step"),
+                kind="recovery",
+                action="recover_execution_context",
+                args={"strategy": strategy, "target_window": target_window},
+                goal="Restore the background tray application through the Windows tray path.",
+                verification=["main window restored from tray"],
+                fallback=["keyboard-driven tray navigation"],
+            )
+        )
+        return steps
+
+    if intent == "recover_window_visibility":
+        steps.append(
+            PlanStep(
+                id=new_id("step"),
+                kind="recovery",
+                action="recover_execution_context",
+                args={"strategy": "occlusion_rescue", "target_window": target_window},
+                goal="Recover a window that is hidden behind other windows.",
+                verification=["window visible and focused"],
+                fallback=["show desktop then refocus"],
+            )
+        )
+        return steps
 
     if target_window:
         steps.append(
@@ -200,6 +236,7 @@ def plan_desktop_task(instruction: str, current_context: str | None = None) -> D
     intent, confidence = _intent_and_confidence(normalized)
     target_window = _extract_target_window(normalized)
     steps = _build_steps(normalized, intent, target_window)
+    strategy_hints = collect_strategy_hints(normalized, app=target_window)
 
     risk = assess_tool_risk(
         "plan_desktop_task", {"instruction": normalized, "risk_context": normalized}
@@ -226,6 +263,7 @@ def plan_desktop_task(instruction: str, current_context: str | None = None) -> D
         status=status,
         target_window=target_window,
         risk_reasons=[risk.reason] if risk.reason else [],
+        strategy_hints=strategy_hints,
         steps=steps,
     )
     _PLANS[plan.plan_id] = plan

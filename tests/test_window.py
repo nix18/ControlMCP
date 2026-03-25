@@ -95,6 +95,8 @@ class TestToolCaptureWindow:
             save_dir=None,
             quality=80,
             max_width=None,
+            grid_rows=None,
+            grid_cols=None,
         )
         data = json.loads(result)
         assert "Notepad" in data["window_title"]
@@ -105,12 +107,21 @@ class TestToolCaptureWindow:
         mock_result.to_json.return_value = "{}"
         mock_capture.return_value = mock_result
 
-        tool_capture_window("Chrome", save_dir="/screenshots", quality=75, max_width=900)
+        tool_capture_window(
+            "Chrome",
+            save_dir="/screenshots",
+            quality=75,
+            max_width=900,
+            grid_rows=3,
+            grid_cols=3,
+        )
         mock_capture.assert_called_once_with(
             "Chrome",
             save_dir="/screenshots",
             quality=75,
             max_width=900,
+            grid_rows=3,
+            grid_cols=3,
         )
 
     @patch("control_mcp.tools.window.capture_window")

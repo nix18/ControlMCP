@@ -50,6 +50,8 @@ def tool_capture_window(
     save_dir: str | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> str:
     """Focus a window and capture a screenshot of it.
 
@@ -66,5 +68,12 @@ def tool_capture_window(
     max_width:
         Scale image to this max width (preserving aspect ratio).
     """
-    result = capture_window(title, save_dir=save_dir, quality=quality, max_width=max_width)
+    result = capture_window(
+        title,
+        save_dir=save_dir,
+        quality=quality,
+        max_width=max_width,
+        grid_rows=grid_rows,
+        grid_cols=grid_cols,
+    )
     return result.to_json()

@@ -24,6 +24,7 @@ computer-control/
 - 先把模糊操作指令转成结构化计划，再执行
 - 对支付、密码、资产类动作先走确认闸门
 - 在快捷键误用或界面跑偏后，优先走恢复流程而不是继续幻觉操作
+- 对于小按钮、小图标、密集表格，优先使用“网格辅助截图 + 网格定位”来修正点击偏差
 
 ## 重构后的推荐入口
 
@@ -47,6 +48,7 @@ plan_desktop_task -> execute_desktop_plan -> 必要时 confirm_sensitive_action 
 - 强化“全局导航 vs 局部推进”的区分
 - 把聚焦失败视为常态场景，加入 `Alt+Tab` / 任务栏 / 标题栏点击兜底
 - 增加滚动区域长截图 SOP，适配新的 `capture_scroll_region` tool
+- 增加 Windows 托盘恢复、遮挡恢复、微信托盘登录态恢复的双层策略
 
 ## 什么时候该用这个 Skill
 

@@ -24,6 +24,8 @@ class TestToolCaptureScreen:
             monitor_index=None,
             quality=80,
             max_width=None,
+            grid_rows=None,
+            grid_cols=None,
         )
         assert "test.png" in result
 
@@ -33,12 +35,21 @@ class TestToolCaptureScreen:
         mock_result.to_json.return_value = "{}"
         mock_capture.return_value = mock_result
 
-        tool_capture_screen(save_dir="/custom", monitor=2, quality=70, max_width=960)
+        tool_capture_screen(
+            save_dir="/custom",
+            monitor=2,
+            quality=70,
+            max_width=960,
+            grid_rows=3,
+            grid_cols=4,
+        )
         mock_capture.assert_called_once_with(
             save_dir="/custom",
             monitor_index=2,
             quality=70,
             max_width=960,
+            grid_rows=3,
+            grid_cols=4,
         )
 
 
@@ -58,6 +69,8 @@ class TestToolCaptureRegion:
             save_dir=None,
             quality=80,
             max_width=None,
+            grid_rows=None,
+            grid_cols=None,
         )
         assert "800" in result
 
@@ -75,6 +88,8 @@ class TestToolCaptureRegion:
             save_dir="/screenshots",
             quality=90,
             max_width=640,
+            grid_rows=2,
+            grid_cols=5,
         )
         mock_capture.assert_called_once_with(
             0,
@@ -84,6 +99,8 @@ class TestToolCaptureRegion:
             save_dir="/screenshots",
             quality=90,
             max_width=640,
+            grid_rows=2,
+            grid_cols=5,
         )
 
 

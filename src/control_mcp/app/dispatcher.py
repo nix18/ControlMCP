@@ -25,6 +25,7 @@ from control_mcp.tools.actions import (
     tool_wait,
 )
 from control_mcp.tools.combined import tool_mouse_and_keyboard
+from control_mcp.tools.grid import tool_click_grid_target, tool_resolve_grid_target
 from control_mcp.tools.keyboard import (
     tool_key_hold,
     tool_key_press,
@@ -61,6 +62,7 @@ _GUARDED_TOOL_NAMES = {
     "launch_app",
     "launch_url",
     "hotkey",
+    "click_grid_target",
 }
 
 
@@ -83,6 +85,8 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             monitor=args.get("monitor"),
             quality=args.get("quality", 80),
             max_width=args.get("max_width"),
+            grid_rows=args.get("grid_rows"),
+            grid_cols=args.get("grid_cols"),
         )
     if name == "capture_region":
         return tool_capture_region(
@@ -93,6 +97,8 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             save_dir=args.get("save_dir"),
             quality=args.get("quality", 80),
             max_width=args.get("max_width"),
+            grid_rows=args.get("grid_rows"),
+            grid_cols=args.get("grid_cols"),
         )
     if name == "capture_scroll_region":
         return tool_capture_scroll_region(
@@ -104,6 +110,17 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             save_dir=args.get("save_dir"),
             quality=args.get("quality", 80),
             max_width=args.get("max_width"),
+        )
+    if name == "resolve_grid_target":
+        return tool_resolve_grid_target(
+            base_x=args["base_x"],
+            base_y=args["base_y"],
+            image_width=args["image_width"],
+            image_height=args["image_height"],
+            grid_rows=args["grid_rows"],
+            grid_cols=args["grid_cols"],
+            cell=args["cell"],
+            anchor=args.get("anchor", "center"),
         )
     if name == "get_screen_info":
         return tool_get_screen_info()
@@ -119,6 +136,18 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             save_dir=args.get("save_dir"),
             quality=args.get("quality", 80),
             max_width=args.get("max_width"),
+            grid_rows=args.get("grid_rows"),
+            grid_cols=args.get("grid_cols"),
+        )
+    if name == "click_grid_target":
+        return tool_click_grid_target(
+            capture=args["capture"],
+            cell=args["cell"],
+            anchor=args.get("anchor", "center"),
+            button=args.get("button", "left"),
+            clicks=args.get("clicks", 1),
+            move_only=args.get("move_only", False),
+            duration=args.get("duration", 0.25),
         )
     if name == "mouse_click":
         return tool_mouse_click(
@@ -237,6 +266,7 @@ def _resolve_plan(args: dict[str, Any]) -> DesktopTaskPlan | None:
         status=payload.get("status", "ready"),
         target_window=payload.get("target_window"),
         risk_reasons=payload.get("risk_reasons", []),
+        strategy_hints=payload.get("strategy_hints", []),
         steps=steps,
         created_at=payload.get("created_at") or __import__("datetime").datetime.now().isoformat(),
     )

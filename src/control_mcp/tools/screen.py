@@ -17,6 +17,8 @@ def tool_capture_screen(
     monitor: int | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> str:
     """Capture the full screen or a specific monitor.
 
@@ -34,7 +36,12 @@ def tool_capture_screen(
         E.g. 960 halves a 1920-wide screen. Reduces token cost for LLM analysis.
     """
     result = capture_full_screen(
-        save_dir=save_dir, monitor_index=monitor, quality=quality, max_width=max_width
+        save_dir=save_dir,
+        monitor_index=monitor,
+        quality=quality,
+        max_width=max_width,
+        grid_rows=grid_rows,
+        grid_cols=grid_cols,
     )
     return result.to_json()
 
@@ -47,6 +54,8 @@ def tool_capture_region(
     save_dir: str | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    grid_rows: int | None = None,
+    grid_cols: int | None = None,
 ) -> str:
     """Capture a rectangular region of the screen.
 
@@ -68,7 +77,15 @@ def tool_capture_region(
         Scale image to this max width (preserving aspect ratio).
     """
     result = capture_region(
-        x, y, width, height, save_dir=save_dir, quality=quality, max_width=max_width
+        x,
+        y,
+        width,
+        height,
+        save_dir=save_dir,
+        quality=quality,
+        max_width=max_width,
+        grid_rows=grid_rows,
+        grid_cols=grid_cols,
     )
     return result.to_json()
 

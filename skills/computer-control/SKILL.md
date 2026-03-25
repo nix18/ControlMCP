@@ -19,6 +19,7 @@ description: |
 - 对“窗口已就绪”“页面已加载”“内容已稳定”“长内容已完整采集”给出可复核判断
 - 对支付、密码、资产类动作先要求显式确认
 - 快捷键误用或界面跑偏时，优先 `recover_execution_context`，而不是继续凭想象操作
+- 对视觉定位误差明显的小目标，优先使用网格辅助截图，而不是直接估坐标点击
 
 ## 控制平面优先
 
@@ -43,6 +44,54 @@ plan_desktop_task
 - 需要多步导航
 - 需要识图定位
 - 涉及支付、密码、验证码、资产
+
+## 网格辅助点击
+
+当模型看图后对点击位置没有把握，或者目标是小按钮、图标、窄表格单元时，优先这样做：
+
+```text
+1. capture_window / capture_region，并传 grid_rows + grid_cols
+2. 同时拿到原图和 grid_file_path 网格图
+3. 在网格图中指定: 第几个格子 + 哪个锚点
+4. 用 resolve_grid_target 换算成屏幕绝对坐标
+5. 再 mouse_move / mouse_click，或者直接 click_grid_target
+```
+
+推荐锚点：
+- 默认用 `center`
+- 贴近边缘的目标再用 `top` / `right` / `bottom` / `left`
+- 很小的角标目标再用 `top_right` 之类的角锚点
+
+## Windows 托盘 / 后台驻留经验
+
+- 对后台驻留应用，`Win+B` 是高效入口
+- 进入通知区域后，很多场景先 `Enter` 就能恢复主窗口
+- 消息类应用的托盘图标会闪动，一次截图不一定总能截到，优先“短等待 + 多次截图”
+- 如果托盘图标不稳定，必要时改用键盘导航，不要完全依赖一次截图定位
+- 微信这类应用如果托盘里已有登录态，正确路径通常是“从托盘恢复主窗口”，而不是“再次启动一个微信实例”
+
+推荐恢复顺序：
+
+```text
+Win+B -> wait(0.5) -> Enter -> wait -> focus_window("微信") -> capture_window 验证
+```
+
+## 遮挡恢复
+
+当目标窗口被别的窗口遮挡：
+
+```text
+focus_window -> Win+Up
+```
+
+如果仍然混乱：
+
+```text
+Win+D -> focus_window -> capture_window 验证
+```
+
+Windows 系统快捷键以 Microsoft 官方文档为准：
+- `https://support.microsoft.com/zh-cn/windows/windows-%E7%9A%84%E9%94%AE%E7%9B%98%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F-dcc61a57-8ff0-cffe-9796-cb9706c75eec#windowsversion=windows_11`
 
 ## 快速入场
 
