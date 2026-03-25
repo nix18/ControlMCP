@@ -1,13 +1,13 @@
 """Tests for keyboard control tools (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch
 
 from control_mcp.tools.keyboard import (
-    tool_key_press,
     tool_key_hold,
-    tool_key_type,
+    tool_key_press,
     tool_key_sequence,
+    tool_key_type,
 )
 
 

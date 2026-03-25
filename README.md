@@ -50,7 +50,18 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 }
 ```
 
-## Tools (25 total)
+## Tools (31 total)
+
+### Control Plane
+
+| Tool | Description |
+|------|-------------|
+| `plan_desktop_task` | Convert a vague desktop instruction into a structured plan |
+| `execute_desktop_plan` | Run a structured plan through the guarded executor |
+| `get_execution_status` | Query the current status of a high-level execution run |
+| `confirm_sensitive_action` | Explicitly approve or reject a sensitive action |
+| `recover_execution_context` | Rebuild context after shortcut misuse or UI drift |
+| `record_workflow_experience` | Persist reusable workflow experience |
 
 ### Screen Capture
 
@@ -112,6 +123,12 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 
 ```json
+// Plan a vague desktop task first
+{"tool": "plan_desktop_task", "args": {"instruction": "Switch to PyCharm and run the current config"}}
+
+// Execute a generated plan
+{"tool": "execute_desktop_plan", "args": {"plan_id": "plan_abc123"}}
+
 // Take a screenshot
 {"tool": "capture_screen", "args": {}}
 
@@ -125,6 +142,17 @@ See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
     {"action": "key_type", "text": "New text"}
 ]}}
 ```
+
+## Rebuilt Workflow
+
+ControlMCP now supports a control-plane-first workflow for higher precision desktop automation:
+
+1. Normalize the user instruction with `plan_desktop_task`
+2. Review or directly execute the structured plan
+3. Let the guarded executor choose a faster observation strategy (`capture_window` / `capture_region` / `capture_scroll_region`)
+4. Verify each critical step and recover when context is lost
+5. Require explicit confirmation for payment/password/asset-related actions
+6. Save successful workflow experience for future runs
 
 ## Documentation
 
@@ -157,9 +185,11 @@ The `skills/computer-control/` folder contains a ready-to-use Agent Skill that t
 ### What the skill covers
 
 - **Keyboard-first automation**: prefer shortcuts over UI clicking whenever possible
+- **Plan-before-act control plane**: normalize ambiguous instructions before touching the desktop
 - **Window recovery**: fix minimized, half-screen, or partially restored windows before further actions
 - **Coordinate-safe clicking**: convert screenshot-local coordinates into screen coordinates explicitly
 - **IDE workflows**: IntelliJ IDEA / PyCharm run-configuration selection, run-panel switching, and log monitoring
+- **Sensitive-action gating**: require confirmation before payment/password/asset-related steps
 - **Operational fallback**: when JetBrains shortcuts do not behave as expected, check the local `ReferenceCard.pdf` or JetBrains official documentation
 
 ### Install the skill into your agent

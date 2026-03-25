@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+from contextlib import suppress
 
 import pyautogui
 
@@ -68,10 +69,8 @@ def tool_key_hold(keys: list[str], hold_seconds: float) -> str:
     except Exception as e:
         # Best-effort release
         for k in reversed(keys):
-            try:
+            with suppress(Exception):
                 pyautogui.keyUp(k)
-            except Exception:
-                pass
         return KeyResult(
             success=False,
             keys=keys,

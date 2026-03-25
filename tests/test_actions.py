@@ -1,16 +1,16 @@
 """Tests for additional action tools (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from control_mcp.tools.actions import (
     tool_clipboard_get,
     tool_clipboard_set,
+    tool_get_pixel_color,
+    tool_hotkey,
     tool_launch_app,
     tool_launch_url,
     tool_wait,
-    tool_get_pixel_color,
-    tool_hotkey,
 )
 
 

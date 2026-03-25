@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import Any
 
 
 def list_windows() -> list[dict[str, Any]]:
     """List all visible windows on Linux via Xlib."""
     try:
-        from Xlib import display, X
-        from Xlib.protocol import request
+        from Xlib import X, display
     except ImportError:
         return []
 
@@ -35,10 +35,8 @@ def list_windows() -> list[dict[str, Any]]:
             )
             title = name_prop.value.decode("utf-8", errors="replace") if name_prop else ""
             if not title:
-                try:
+                with suppress(Exception):
                     title = win.get_wm_name() or ""
-                except Exception:
-                    pass
             results.append(
                 {
                     "title": title,
@@ -61,7 +59,7 @@ def list_windows() -> list[dict[str, Any]]:
 def focus_window(title: str) -> bool:
     """Activate the first window whose title contains *title*."""
     try:
-        from Xlib import display, X
+        from Xlib import X, display
     except ImportError:
         return False
 

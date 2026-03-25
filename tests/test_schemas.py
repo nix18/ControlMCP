@@ -1,20 +1,21 @@
 """Tests for schema response types."""
 
 import json
+
 from control_mcp.schemas.responses import (
-    OperationResult,
-    ScreenshotResult,
-    WindowScreenshotResult,
-    WindowInfo,
-    WindowListResult,
     ClickResult,
-    DragResult,
-    KeyResult,
-    MousePosition,
-    MonitorInfo,
-    ScreenInfoResult,
     ClipboardResult,
     CompositeActionResult,
+    DragResult,
+    KeyResult,
+    MonitorInfo,
+    MousePosition,
+    OperationResult,
+    ScreenInfoResult,
+    ScreenshotResult,
+    WindowInfo,
+    WindowListResult,
+    WindowScreenshotResult,
     make_screenshot_filename,
 )
 

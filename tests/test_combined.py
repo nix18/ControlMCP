@@ -1,7 +1,7 @@
 """Tests for combined mouse+keyboard operations (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from control_mcp.tools.combined import tool_mouse_and_keyboard
 

@@ -50,7 +50,18 @@ control-mcp
 }
 ```
 
-## 工具列表（共 25 个）
+## 工具列表（共 31 个）
+
+### 控制平面
+
+| 工具 | 描述 |
+|------|------|
+| `plan_desktop_task` | 将模糊桌面指令归一化为结构化执行计划 |
+| `execute_desktop_plan` | 通过带守卫的执行器运行结构化计划 |
+| `get_execution_status` | 查询高层执行任务的当前状态 |
+| `confirm_sensitive_action` | 显式批准或拒绝敏感操作 |
+| `recover_execution_context` | 在快捷键误用或界面跑偏后恢复上下文 |
+| `record_workflow_experience` | 持久化可复用的电脑操作经验 |
 
 ### 屏幕截图
 
@@ -111,6 +122,12 @@ control-mcp
 完整使用示例请参阅 [docs/zh-CN/TUTORIAL.md](docs/zh-CN/TUTORIAL.md)。
 
 ```json
+// 先规划模糊桌面任务
+{"tool": "plan_desktop_task", "args": {"instruction": "切到 PyCharm 并运行当前配置"}}
+
+// 执行生成后的计划
+{"tool": "execute_desktop_plan", "args": {"plan_id": "plan_abc123"}}
+
 // 截取屏幕
 {"tool": "capture_screen", "args": {}}
 
@@ -124,6 +141,17 @@ control-mcp
     {"action": "key_type", "text": "新文本"}
 ]}}
 ```
+
+## 重构后的推荐工作流
+
+ControlMCP 现在支持“控制平面优先”的桌面自动化工作流：
+
+1. 用 `plan_desktop_task` 先把自然语言操作意图拆成结构化计划
+2. 审核或直接执行该计划
+3. 让 guarded executor 自动选择更高效的观察方式（窗口截图 / 区域截图 / 长截图）
+4. 对关键步骤做验证，并在上下文丢失时恢复
+5. 对支付、密码、资产类动作强制要求显式确认
+6. 把成功经验沉淀下来供后续复用
 
 ## 文档
 
@@ -156,9 +184,11 @@ control-mcp
 ### Skill 能解决什么
 
 - 键盘优先的桌面自动化
+- 先规划后执行的高精度桌面控制
 - 窗口被最小化、半屏、布局异常时的修复
 - 精确点击前的坐标换算
 - IntelliJ IDEA / PyCharm 的运行配置选择、Run 面板切换与日志停止更新判定
+- 支付、密码、资产类动作的确认闸门
 - JetBrains 快捷键与点击行为不达预期时的官方资料兜底
 
 ### 如何安装到 Agent

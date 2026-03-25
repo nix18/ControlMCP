@@ -2,7 +2,8 @@
 
 ## 1. System Overview
 
-The ControlMCP server acts as a bridge between LLM clients and the operating system, providing tool-based access to screen capture, window management, mouse control, keyboard control, and more.
+The ControlMCP server now uses a control-plane-first architecture.
+It still exposes low-level atomic tools, but high-precision desktop automation is expected to flow through instruction preprocessing, guarded execution, verification, recovery, and workflow memory.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -15,24 +16,24 @@ The ControlMCP server acts as a bridge between LLM clients and the operating sys
 │                   ControlMCP Server                     │
 │                                                         │
 │  ┌─────────────┐  ┌──────────────────────────────────┐  │
-│  │ MCP Protocol│  │         Tool Registry            │  │
-│  │  (server.py)│──│  24 tools across 6 modules       │  │
+│  │ MCP Protocol│  │        App Registry             │  │
+│  │  (server.py)│──│  atomic + control-plane tools   │  │
 │  └─────────────┘  └──────────────┬───────────────────┘  │
 │                                  │                      │
 │  ┌───────────────────────────────▼───────────────────┐  │
-│  │              Tool Modules                         │  │
-│  │  ┌──────┐ ┌──────┐ ┌─────┐ ┌──────┐ ┌────────┐  │  │
-│  │  │screen│ │window│ │mouse│ │ kbd  │ │combined│  │  │
-│  │  └──┬───┘ └──┬───┘ └──┬──┘ └──┬───┘ └───┬────┘  │  │
-│  │     │        │        │       │         │        │  │
-│  └─────┼────────┼────────┼───────┼─────────┼────────┘  │
-│        │        │        │       │         │           │
-│  ┌─────▼────────▼────────▼───────▼─────────▼────────┐  │
-│  │              Utility Layer                        │  │
-│  │  ┌────────────┐  ┌──────────────────────────┐    │  │
-│  │  │ capture.py │  │ Platform Backends         │    │  │
-│  │  │ (mss+PIL)  │  │ _win / _mac / _linux      │    │  │
-│  │  └────────────┘  └──────────────────────────┘    │  │
+│  │                Control Plane                      │  │
+│  │ planner -> executor -> verifier -> recovery      │  │
+│  │                -> guards -> memory               │  │
+│  └───────────────┬──────────────────────────────────┘  │
+│                  │                                      │
+│  ┌───────────────▼──────────────────────────────────┐  │
+│  │               Atomic Tool Modules                │  │
+│  │  screen / window / mouse / keyboard / combined   │  │
+│  └───────────────┬──────────────────────────────────┘  │
+│                  │                                      │
+│  ┌───────────────▼──────────────────────────────────┐  │
+│  │               Utility Layer                      │  │
+│  │      capture.py + platform window backends       │  │
 │  └──────────────────────────────────────────────────┘  │
 │                                                         │
 │  ┌──────────────────────────────────────────────────┐  │
@@ -55,12 +56,26 @@ The ControlMCP server acts as a bridge between LLM clients and the operating sys
 ### 2.1 MCP Protocol Layer (`server.py`)
 
 - Creates the MCP `Server` instance
-- Defines all `Tool` objects with JSON schemas
-- Dispatches `call_tool` requests to the appropriate handler
+- Loads all tool definitions from the app registry
+- Dispatches `call_tool` requests through a shared dispatcher
 - Wraps results as `TextContent` responses
-- Handles errors gracefully
 
-### 2.2 Tool Modules (`tools/`)
+### 2.2 App Layer (`app/`)
+
+- Owns the central tool registry and dispatcher
+- Keeps `server.py` thin
+- Applies guard checks before risky atomic tools run
+
+### 2.3 Control Plane (`control_plane/`)
+
+- `planner`: normalize vague desktop instructions into a typed plan
+- `executor`: run plan steps against atomic tools
+- `verifier`: confirm that important UI state really changed
+- `recovery`: rebuild context after shortcut misuse or UI drift
+- `guards`: require explicit confirmation for sensitive actions
+- `memory`: save reusable workflow experience
+
+### 2.4 Tool Modules (`tools/`)
 
 Each tool module contains pure functions that:
 - Accept typed parameters
@@ -68,7 +83,7 @@ Each tool module contains pure functions that:
 - Return JSON-serialized structured responses
 - Are independent of MCP protocol details
 
-### 2.3 Utility Layer (`utils/`)
+### 2.5 Utility Layer (`utils/`)
 
 | Module | Description |
 |---|------|
@@ -77,9 +92,10 @@ Each tool module contains pure functions that:
 | **`_mac_window.py`** | macOS-specific window operations via Quartz |
 | **`_linux_window.py`** | Linux-specific window operations via `xlib` |
 
-### 2.4 Schema Layer (`schemas/`)
+### 2.6 Schema / Domain Layer (`schemas/`, `domain/`)
 
 - Dataclasses for all structured response types
+- Typed models for plans, execution runs, confirmation tickets, and workflow experience
 - JSON serialization via `to_json()` / `to_dict()` methods
 - Filename generation for screenshots
 
@@ -107,6 +123,18 @@ LLM → mouse_click(x=500, y=300, button="left") → tool_mouse_click()
 
 ### Combined Action Flow
 
+```
+
+### Control-Plane Flow
+
+```
+LLM → plan_desktop_task(instruction=...) → planner
+  → DesktopTaskPlan(steps=[...], needs_confirmation=...)
+  → execute_desktop_plan(plan_id=...)
+  → guards check sensitive steps
+  → executor dispatches atomic tools
+  → verifier checks outcome / recovery runs if needed
+  → run status / confirmation / workflow memory result
 ```
 LLM → mouse_and_keyboard(actions=[...]) → tool_mouse_and_keyboard()
   → for each action: dispatch to pyautogui operation

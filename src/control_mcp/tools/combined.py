@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import time
 
 import pyautogui
@@ -21,8 +20,10 @@ def tool_mouse_and_keyboard(
 
     **Mouse actions:**
     - ``move``: ``{"action": "move", "x": int, "y": int, "duration": float}``
-    - ``click``: ``{"action": "click", "x": int, "y": int, "button": str, "clicks": int, "hold_seconds": float}``
-    - ``drag``: ``{"action": "drag", "start_x": int, "start_y": int, "end_x": int, "end_y": int, "button": str, "duration": float}``
+    - ``click``: ``{"action": "click", "x": int, "y": int, "button": str,
+      "clicks": int, "hold_seconds": float}``
+    - ``drag``: ``{"action": "drag", "start_x": int, "start_y": int,
+      "end_x": int, "end_y": int, "button": str, "duration": float}``
     - ``scroll``: ``{"action": "scroll", "clicks": int, "x": int, "y": int}``
     - ``mouse_down``: ``{"action": "mouse_down", "x": int, "y": int, "button": str}``
     - ``mouse_up``: ``{"action": "mouse_up", "x": int, "y": int, "button": str}``
@@ -34,7 +35,8 @@ def tool_mouse_and_keyboard(
 
     **Utility:**
     - ``wait``: ``{"action": "wait", "seconds": float}``
-    - ``screenshot``: ``{"action": "screenshot", "save_dir": str, "quality": int, "max_width": int}``
+    - ``screenshot``: ``{"action": "screenshot", "save_dir": str,
+      "quality": int, "max_width": int}``
 
     All actions accept an optional ``"delay"`` field (seconds) to wait AFTER the step.
 

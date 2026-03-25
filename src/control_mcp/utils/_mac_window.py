@@ -18,7 +18,6 @@ def list_windows() -> list[dict[str, Any]]:
         bounds = w.get(Quartz.kCGWindowBounds, {})
         name = w.get(Quartz.kCGWindowName, "")
         owner = w.get(Quartz.kCGWindowOwnerName, "")
-        layer = w.get(Quartz.kCGWindowLayer, 0)
         if not name and not owner:
             continue
         results.append(
@@ -48,7 +47,6 @@ def focus_window(title: str) -> bool:
         owner = w.get(Quartz.kCGWindowOwnerName, "")
         combined = f"{owner} {name}".lower()
         if needle in combined:
-            win_id = w.get(Quartz.kCGWindowNumber)
             # Use AppleScript as fallback for raising windows on macOS
             import subprocess
 

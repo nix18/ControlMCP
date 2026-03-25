@@ -11,6 +11,40 @@ This tutorial shows how to use ControlMCP tools — both individually and in com
 5. [Combined Operations](#5-combined-operations)
 6. [Additional Actions](#6-additional-actions)
 7. [Real-World Patterns](#7-real-world-patterns)
+8. [Control Plane Workflow](#8-control-plane-workflow)
+
+---
+
+## 0. Recommended Start: Plan First
+
+When the user intent is vague, do not immediately chain raw keyboard and mouse tools.
+Prefer the new control-plane flow:
+
+```
+tool: plan_desktop_task
+args: {"instruction": "Switch to PyCharm and run the current config"}
+```
+
+Then execute the returned plan:
+
+```
+tool: execute_desktop_plan
+args: {"plan_id": "plan_abc123"}
+```
+
+If a step is sensitive, approve it explicitly:
+
+```
+tool: confirm_sensitive_action
+args: {"confirmation_id": "confirm_abc123", "approve": true}
+```
+
+If the UI drifts or the wrong shortcut was used, recover first:
+
+```
+tool: recover_execution_context
+args: {"strategy": "show_desktop_then_capture"}
+```
 
 ---
 
@@ -406,6 +440,40 @@ args: {"keys": ["ctrl", "shift", "s"]}  # Save As
 ---
 
 ## 7. Real-World Patterns
+
+## 8. Control Plane Workflow
+
+### Plan a vague desktop instruction
+
+```
+tool: plan_desktop_task
+args: {"instruction": "Open the admin page and check the latest error"}
+```
+
+### Execute a plan and poll status
+
+```
+tool: execute_desktop_plan
+args: {"plan_id": "plan_abc123"}
+```
+
+```
+tool: get_execution_status
+args: {"run_id": "run_abc123"}
+```
+
+### Save a successful workflow pattern
+
+```
+tool: record_workflow_experience
+args: {
+  "intent": "run_application_flow",
+  "instruction": "Switch to PyCharm and run the current config",
+  "app": "PyCharm",
+  "summary": "Focus window, maximize, run, then wait until output stabilizes",
+  "preferred_actions": ["focus_window", "key_press", "wait_until_stable"]
+}
+```
 
 ### Pattern: Screenshot -> Analyze -> Click
 

@@ -1,7 +1,7 @@
 """Tests for mouse control tools (mocked)."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from control_mcp.tools.mouse import (
     tool_mouse_click,

@@ -11,6 +11,40 @@
 5. [组合操作](#5-组合操作)
 6. [附加操作](#6-附加操作)
 7. [实际场景模式](#7-实际场景模式)
+8. [控制平面工作流](#8-控制平面工作流)
+
+---
+
+## 0. 推荐入口：先规划再执行
+
+如果用户的电脑操作意图比较模糊，不要立刻串联原子鼠标键盘工具。
+优先使用新的控制平面工作流：
+
+```
+tool: plan_desktop_task
+args: {"instruction": "切到 PyCharm 并运行当前配置"}
+```
+
+然后执行返回的计划：
+
+```
+tool: execute_desktop_plan
+args: {"plan_id": "plan_abc123"}
+```
+
+如果步骤是敏感操作，先显式确认：
+
+```
+tool: confirm_sensitive_action
+args: {"confirmation_id": "confirm_abc123", "approve": true}
+```
+
+如果界面跑偏或快捷键误用，先恢复上下文：
+
+```
+tool: recover_execution_context
+args: {"strategy": "show_desktop_then_capture"}
+```
 
 ---
 
@@ -388,6 +422,40 @@ args: {"keys": ["ctrl", "shift", "s"]}  # 另存为
 ---
 
 ## 7. 实际场景模式
+
+## 8. 控制平面工作流
+
+### 为模糊桌面指令生成计划
+
+```
+tool: plan_desktop_task
+args: {"instruction": "打开后台并看下最新报错"}
+```
+
+### 执行计划并轮询状态
+
+```
+tool: execute_desktop_plan
+args: {"plan_id": "plan_abc123"}
+```
+
+```
+tool: get_execution_status
+args: {"run_id": "run_abc123"}
+```
+
+### 保存一次成功的操作经验
+
+```
+tool: record_workflow_experience
+args: {
+  "intent": "run_application_flow",
+  "instruction": "切到 PyCharm 并运行当前配置",
+  "app": "PyCharm",
+  "summary": "聚焦窗口、最大化、运行，然后等待控制台稳定",
+  "preferred_actions": ["focus_window", "key_press", "wait_until_stable"]
+}
+```
 
 ### 模式：截图→分析→点击
 
