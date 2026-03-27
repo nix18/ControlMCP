@@ -3,11 +3,14 @@
 import json
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from control_mcp.tools.screen import (
     tool_capture_region,
     tool_capture_screen,
     tool_capture_scroll_region,
     tool_get_screen_info,
+    tool_read_screenshot_base64,
 )
 
 
@@ -178,3 +181,30 @@ class TestToolGetScreenInfo:
         result = tool_get_screen_info()
         data = json.loads(result)
         assert data["monitors"] == []
+
+
+class TestToolReadScreenshotBase64:
+    def test_reads_file_as_base64(self, tmp_path):
+        image_path = tmp_path / "shot.png"
+        image_path.write_bytes(b"fake-image-bytes")
+
+        payload = json.loads(tool_read_screenshot_base64(str(image_path)))
+
+        assert payload["success"] is True
+        assert payload["file_path"] == str(image_path)
+        assert payload["mime_type"] == "image/png"
+        assert payload["base64"] == "ZmFrZS1pbWFnZS1ieXRlcw=="
+
+    def test_can_return_data_url(self, tmp_path):
+        image_path = tmp_path / "shot.jpg"
+        image_path.write_bytes(b"jpg-bytes")
+
+        payload = json.loads(tool_read_screenshot_base64(str(image_path), as_data_url=True))
+
+        assert payload["data_url"].startswith("data:image/jpeg;base64,")
+
+    def test_rejects_missing_file(self, tmp_path):
+        missing_path = tmp_path / "missing.png"
+
+        with pytest.raises(ValueError, match="does not exist"):
+            tool_read_screenshot_base64(str(missing_path))

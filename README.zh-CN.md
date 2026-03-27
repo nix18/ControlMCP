@@ -50,7 +50,7 @@ control-mcp
 }
 ```
 
-## 工具列表（共 33 个）
+## 工具列表（共 34 个）
 
 ### 控制平面
 
@@ -71,6 +71,7 @@ control-mcp
 | `capture_region` | 区域截图（x, y, 宽, 高） |
 | `capture_scroll_region` | 在固定区域内滚动并拼接成长截图 |
 | `get_screen_info` | 列出所有显示器及其分辨率 |
+| `read_screenshot_base64` | 将截图文件读取为 Base64 文本 |
 | `resolve_grid_target` | 将网格编号 + 锚点换算成精确屏幕坐标 |
 | `click_grid_target` | 直接用截图网格元数据解析并点击 |
 
@@ -132,6 +133,9 @@ control-mcp
 
 // 截取屏幕
 {"tool": "capture_screen", "args": {}}
+
+// 对无多模态读取能力的模型，把截图文件读取为 Base64 文本
+{"tool": "read_screenshot_base64", "args": {"file_path": "/tmp/screen.jpg"}}
 
 // 在 (500, 300) 处点击
 {"tool": "mouse_click", "args": {"x": 500, "y": 300}}

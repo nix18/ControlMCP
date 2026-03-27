@@ -68,6 +68,21 @@ def _atomic_tools() -> list[Tool]:
             inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
+            name="read_screenshot_base64",
+            description=(
+                "Read a screenshot file and return Base64 text. Useful for models "
+                "that cannot directly inspect image attachments."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "file_path": {"type": "string"},
+                    "as_data_url": {"type": "boolean", "default": False},
+                },
+                "required": ["file_path"],
+            },
+        ),
+        Tool(
             name="list_windows",
             description="List all visible windows.",
             inputSchema={"type": "object", "properties": {}},
@@ -153,7 +168,8 @@ def _atomic_tools() -> list[Tool]:
             name="click_grid_target",
             description=(
                 "Use grid metadata from a screenshot response to resolve and directly "
-                "move or click the target cell anchor."
+                "move or click the target cell anchor. If capture metadata is omitted, "
+                "the tool defaults to the most recent screenshot metadata that included a grid."
             ),
             inputSchema={
                 "type": "object",
@@ -186,7 +202,7 @@ def _atomic_tools() -> list[Tool]:
                     "risk_context": {"type": "string"},
                     "confirmation_token": {"type": "string"},
                 },
-                "required": ["capture", "cell"],
+                "required": ["cell"],
             },
         ),
         Tool(

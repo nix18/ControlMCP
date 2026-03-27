@@ -50,7 +50,7 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 }
 ```
 
-## Tools (33 total)
+## Tools (34 total)
 
 ### Control Plane
 
@@ -71,6 +71,7 @@ Add to your MCP client config (e.g. Claude Desktop, Cursor, etc.):
 | `capture_region` | Region screenshot (x, y, width, height) |
 | `capture_scroll_region` | Stitch a long screenshot while scrolling inside a fixed region |
 | `get_screen_info` | List all monitors with resolution |
+| `read_screenshot_base64` | Read a screenshot file as Base64 text |
 | `resolve_grid_target` | Convert a grid cell + anchor into precise screen coordinates |
 | `click_grid_target` | Resolve screenshot grid metadata and click directly |
 
@@ -133,6 +134,9 @@ See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 
 // Take a screenshot
 {"tool": "capture_screen", "args": {}}
+
+// Read that screenshot as Base64 text for non-multimodal models
+{"tool": "read_screenshot_base64", "args": {"file_path": "/tmp/screen.jpg"}}
 
 // Click at (500, 300)
 {"tool": "mouse_click", "args": {"x": 500, "y": 300}}

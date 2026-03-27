@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 
+from control_mcp.tools.grid import remember_grid_capture
 from control_mcp.utils.capture import (
     capture_window,
     find_windows,
@@ -76,4 +77,6 @@ def tool_capture_window(
         grid_rows=grid_rows,
         grid_cols=grid_cols,
     )
+    if result.grid_rows and result.grid_cols:
+        remember_grid_capture(result.to_dict())
     return result.to_json()

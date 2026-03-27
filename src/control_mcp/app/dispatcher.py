@@ -44,6 +44,7 @@ from control_mcp.tools.screen import (
     tool_capture_screen,
     tool_capture_scroll_region,
     tool_get_screen_info,
+    tool_read_screenshot_base64,
 )
 from control_mcp.tools.window import (
     tool_capture_window,
@@ -124,6 +125,11 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
         )
     if name == "get_screen_info":
         return tool_get_screen_info()
+    if name == "read_screenshot_base64":
+        return tool_read_screenshot_base64(
+            file_path=args["file_path"],
+            as_data_url=args.get("as_data_url", False),
+        )
     if name == "list_windows":
         return tool_list_windows()
     if name == "find_windows":
@@ -141,7 +147,7 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
         )
     if name == "click_grid_target":
         return tool_click_grid_target(
-            capture=args["capture"],
+            capture=args.get("capture"),
             cell=args["cell"],
             anchor=args.get("anchor", "center"),
             button=args.get("button", "left"),

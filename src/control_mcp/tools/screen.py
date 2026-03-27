@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import base64
 import json
+import mimetypes
+from pathlib import Path
 
+from control_mcp.tools.grid import remember_grid_capture
 from control_mcp.utils.capture import (
     capture_full_screen,
     capture_region,
@@ -43,6 +47,8 @@ def tool_capture_screen(
         grid_rows=grid_rows,
         grid_cols=grid_cols,
     )
+    if result.grid_rows and result.grid_cols:
+        remember_grid_capture(result.to_dict())
     return result.to_json()
 
 
@@ -87,6 +93,8 @@ def tool_capture_region(
         grid_rows=grid_rows,
         grid_cols=grid_cols,
     )
+    if result.grid_rows and result.grid_cols:
+        remember_grid_capture(result.to_dict())
     return result.to_json()
 
 
@@ -119,3 +127,29 @@ def tool_get_screen_info() -> str:
     monitors = get_monitors()
     data = {"monitors": [m.to_dict() for m in monitors]}
     return json.dumps(data, ensure_ascii=False)
+
+
+def tool_read_screenshot_base64(file_path: str, as_data_url: bool = False) -> str:
+    """Read a screenshot file and return its Base64 representation.
+
+    Useful for models that cannot directly consume attached images but can process
+    text payloads.
+    """
+    path = Path(file_path)
+    if not path.exists():
+        raise ValueError(f"Screenshot file does not exist: {file_path}")
+    if not path.is_file():
+        raise ValueError(f"Path is not a file: {file_path}")
+
+    mime_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    payload = {
+        "success": True,
+        "file_path": str(path),
+        "mime_type": mime_type,
+        "base64": encoded,
+        "size_bytes": path.stat().st_size,
+    }
+    if as_data_url:
+        payload["data_url"] = f"data:{mime_type};base64,{encoded}"
+    return json.dumps(payload, ensure_ascii=False)
