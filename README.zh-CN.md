@@ -1,6 +1,7 @@
 # ControlMCP
 
-> 用于 LLM 控制电脑的 MCP 服务器 — 屏幕截图、窗口管理、鼠标与键盘自动化。
+> 😆你已经是一个成熟的大模型了，要学会自己操作电脑了
+</br></br>🛠️用于 LLM 控制电脑的 MCP 服务器 — 屏幕截图、窗口管理、鼠标与键盘自动化。
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)

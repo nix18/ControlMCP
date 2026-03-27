@@ -1,6 +1,7 @@
 # ControlMCP
 
-> MCP server for LLM-controlled computer operations — screen capture, window management, mouse & keyboard automation.
+> 😆You’re already a mature LLM, so you should learn to operate the computer by yourself.
+</br></br>🛠️MCP server for LLM-controlled computer operations — screen capture, window management, mouse & keyboard automation.
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)

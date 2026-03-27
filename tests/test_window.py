@@ -195,3 +195,63 @@ class TestToolCaptureWindow:
         mock_capture.side_effect = ValueError("No window found")
         with pytest.raises(ValueError, match="No window found"):
             tool_capture_window("missing_window")
+
+
+class TestCaptureWindowFlow:
+    @patch("control_mcp.utils.capture._save_grid_overlay", return_value=None)
+    @patch("control_mcp.utils.capture._save_image", return_value=("/tmp/window.jpg", 123))
+    @patch("control_mcp.utils.capture.Image.frombytes")
+    @patch("control_mcp.utils.capture.mss.mss")
+    @patch("control_mcp.utils.capture._get_platform_window_backend")
+    def test_refocuses_and_reloads_geometry_before_capture(
+        self,
+        mock_get_backend,
+        mock_mss,
+        mock_frombytes,
+        _mock_save_image,
+        _mock_save_grid,
+    ):
+        backend = MagicMock()
+        backend.find_and_get_geometry.side_effect = [
+            {"title": "Demo", "x": -32000, "y": -32000, "width": 160, "height": 28},
+            {"title": "Demo", "x": 100, "y": 200, "width": 800, "height": 600},
+        ]
+        backend.focus_window.return_value = True
+        mock_get_backend.return_value = backend
+
+        raw = MagicMock()
+        raw.size = (800, 600)
+        raw.bgra = b"raw"
+        mock_mss.return_value.__enter__.return_value.grab.return_value = raw
+
+        img = MagicMock()
+        img.width = 800
+        img.height = 600
+        mock_frombytes.return_value = img
+
+        from control_mcp.utils.capture import capture_window
+
+        result = capture_window("Demo")
+
+        assert result.window_x == 100
+        assert result.window_y == 200
+        backend.focus_window.assert_called_once_with("Demo")
+        assert backend.find_and_get_geometry.call_count == 2
+        mock_mss.return_value.__enter__.return_value.grab.assert_called_once_with(
+            {"left": 100, "top": 200, "width": 800, "height": 600}
+        )
+
+    @patch("control_mcp.utils.capture._get_platform_window_backend")
+    def test_raises_when_window_still_minimized_after_focus(self, mock_get_backend):
+        backend = MagicMock()
+        backend.find_and_get_geometry.side_effect = [
+            {"title": "Demo", "x": -32000, "y": -32000, "width": 160, "height": 28},
+            {"title": "Demo", "x": -32000, "y": -32000, "width": 160, "height": 28},
+        ]
+        backend.focus_window.return_value = True
+        mock_get_backend.return_value = backend
+
+        from control_mcp.utils.capture import capture_window
+
+        with pytest.raises(ValueError, match="still minimized or off-screen"):
+            capture_window("Demo")

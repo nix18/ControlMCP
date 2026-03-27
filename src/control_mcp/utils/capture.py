@@ -554,17 +554,26 @@ def capture_window(
     save_path = _ensure_dir(Path(save_dir) if save_dir else _DEFAULT_DIR)
     grid_rows, grid_cols = _normalize_grid(grid_rows, grid_cols)
 
-    win = backend.find_and_get_geometry(title)
-    if win is None:
+    initial_win = backend.find_and_get_geometry(title)
+    if initial_win is None:
         raise ValueError(f"No window found matching '{title}'")
 
-    # Focus the window first
-    backend.focus_window(title)
+    if not backend.focus_window(title):
+        raise ValueError(f"Unable to focus window matching '{title}'")
 
-    # Small delay to allow the window to come to front
     import time
 
     time.sleep(0.2)
+
+    win = backend.find_and_get_geometry(title)
+    if win is None:
+        raise ValueError(f"Window disappeared while trying to capture '{title}'")
+
+    if win["width"] <= 0 or win["height"] <= 0:
+        raise ValueError(f"Window '{title}' is not in a capturable state")
+
+    if win["x"] <= -30000 or win["y"] <= -30000:
+        raise ValueError(f"Window '{title}' is still minimized or off-screen after focus")
 
     # Capture the region
     region = {
