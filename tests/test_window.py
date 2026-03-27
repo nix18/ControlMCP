@@ -163,6 +163,7 @@ class TestToolCaptureWindow:
             max_width=None,
             grid_rows=None,
             grid_cols=None,
+            sharpen=False,
         )
         data = json.loads(result)
         assert "Notepad" in data["window_title"]
@@ -180,6 +181,7 @@ class TestToolCaptureWindow:
             max_width=900,
             grid_rows=3,
             grid_cols=3,
+            sharpen=False,
         )
         mock_capture.assert_called_once_with(
             "Chrome",
@@ -188,6 +190,25 @@ class TestToolCaptureWindow:
             max_width=900,
             grid_rows=3,
             grid_cols=3,
+            sharpen=False,
+        )
+
+    @patch("control_mcp.tools.window.capture_window")
+    def test_with_sharpen(self, mock_capture):
+        mock_result = MagicMock()
+        mock_result.to_json.return_value = "{}"
+        mock_capture.return_value = mock_result
+
+        tool_capture_window("Notepad", sharpen=True)
+
+        mock_capture.assert_called_once_with(
+            "Notepad",
+            save_dir=None,
+            quality=80,
+            max_width=None,
+            grid_rows=None,
+            grid_cols=None,
+            sharpen=True,
         )
 
     @patch("control_mcp.tools.window.capture_window")

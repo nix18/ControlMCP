@@ -23,6 +23,7 @@ def tool_capture_screen(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> str:
     """Capture the full screen or a specific monitor.
 
@@ -46,6 +47,7 @@ def tool_capture_screen(
         max_width=max_width,
         grid_rows=grid_rows,
         grid_cols=grid_cols,
+        sharpen=sharpen,
     )
     if result.grid_rows and result.grid_cols:
         remember_grid_capture(result.to_dict())
@@ -62,6 +64,7 @@ def tool_capture_region(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> str:
     """Capture a rectangular region of the screen.
 
@@ -92,6 +95,7 @@ def tool_capture_region(
         max_width=max_width,
         grid_rows=grid_rows,
         grid_cols=grid_cols,
+        sharpen=sharpen,
     )
     if result.grid_rows and result.grid_cols:
         remember_grid_capture(result.to_dict())
@@ -107,6 +111,7 @@ def tool_capture_scroll_region(
     save_dir: str | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    sharpen: bool = False,
 ) -> str:
     """Capture a scrollable screen region and stitch it into one long image."""
     result = capture_scroll_region(
@@ -118,6 +123,7 @@ def tool_capture_scroll_region(
         save_dir=save_dir,
         quality=quality,
         max_width=max_width,
+        sharpen=sharpen,
     )
     return result.to_json()
 

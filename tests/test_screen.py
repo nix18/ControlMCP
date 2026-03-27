@@ -29,6 +29,7 @@ class TestToolCaptureScreen:
             max_width=None,
             grid_rows=None,
             grid_cols=None,
+            sharpen=False,
         )
         assert "test.png" in result
 
@@ -45,6 +46,7 @@ class TestToolCaptureScreen:
             max_width=960,
             grid_rows=3,
             grid_cols=4,
+            sharpen=False,
         )
         mock_capture.assert_called_once_with(
             save_dir="/custom",
@@ -53,6 +55,7 @@ class TestToolCaptureScreen:
             max_width=960,
             grid_rows=3,
             grid_cols=4,
+            sharpen=False,
         )
 
 
@@ -74,6 +77,7 @@ class TestToolCaptureRegion:
             max_width=None,
             grid_rows=None,
             grid_cols=None,
+            sharpen=False,
         )
         assert "800" in result
 
@@ -93,6 +97,7 @@ class TestToolCaptureRegion:
             max_width=640,
             grid_rows=2,
             grid_cols=5,
+            sharpen=False,
         )
         mock_capture.assert_called_once_with(
             0,
@@ -104,6 +109,28 @@ class TestToolCaptureRegion:
             max_width=640,
             grid_rows=2,
             grid_cols=5,
+            sharpen=False,
+        )
+
+    @patch("control_mcp.tools.screen.capture_region")
+    def test_with_sharpen(self, mock_capture):
+        mock_result = MagicMock()
+        mock_result.to_json.return_value = "{}"
+        mock_capture.return_value = mock_result
+
+        tool_capture_region(x=1, y=2, width=3, height=4, sharpen=True)
+
+        mock_capture.assert_called_once_with(
+            1,
+            2,
+            3,
+            4,
+            save_dir=None,
+            quality=80,
+            max_width=None,
+            grid_rows=None,
+            grid_cols=None,
+            sharpen=True,
         )
 
 
@@ -131,6 +158,7 @@ class TestToolCaptureScrollRegion:
             save_dir=None,
             quality=80,
             max_width=None,
+            sharpen=False,
         )
         assert '"capture_count": 3' in result
 
@@ -149,6 +177,7 @@ class TestToolCaptureScrollRegion:
             save_dir="/shots",
             quality=75,
             max_width=800,
+            sharpen=False,
         )
 
         mock_capture.assert_called_once_with(
@@ -160,6 +189,7 @@ class TestToolCaptureScrollRegion:
             save_dir="/shots",
             quality=75,
             max_width=800,
+            sharpen=False,
         )
 
 

@@ -53,6 +53,7 @@ def tool_capture_window(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> str:
     """Focus a window and capture a screenshot of it.
 
@@ -76,6 +77,7 @@ def tool_capture_window(
         max_width=max_width,
         grid_rows=grid_rows,
         grid_cols=grid_cols,
+        sharpen=sharpen,
     )
     if result.grid_rows and result.grid_cols:
         remember_grid_capture(result.to_dict())

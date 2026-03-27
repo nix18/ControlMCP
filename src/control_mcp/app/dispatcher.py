@@ -88,6 +88,7 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             max_width=args.get("max_width"),
             grid_rows=args.get("grid_rows"),
             grid_cols=args.get("grid_cols"),
+            sharpen=args.get("sharpen", False),
         )
     if name == "capture_region":
         return tool_capture_region(
@@ -100,6 +101,7 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             max_width=args.get("max_width"),
             grid_rows=args.get("grid_rows"),
             grid_cols=args.get("grid_cols"),
+            sharpen=args.get("sharpen", False),
         )
     if name == "capture_scroll_region":
         return tool_capture_scroll_region(
@@ -111,6 +113,7 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             save_dir=args.get("save_dir"),
             quality=args.get("quality", 80),
             max_width=args.get("max_width"),
+            sharpen=args.get("sharpen", False),
         )
     if name == "resolve_grid_target":
         return tool_resolve_grid_target(
@@ -144,6 +147,7 @@ def dispatch_tool(name: str, args: dict[str, Any]) -> str:
             max_width=args.get("max_width"),
             grid_rows=args.get("grid_rows"),
             grid_cols=args.get("grid_cols"),
+            sharpen=args.get("sharpen", False),
         )
     if name == "click_grid_target":
         return tool_click_grid_target(

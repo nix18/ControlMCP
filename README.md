@@ -136,6 +136,9 @@ See [docs/TUTORIAL.md](docs/TUTORIAL.md) for comprehensive usage examples.
 // Take a screenshot
 {"tool": "capture_screen", "args": {}}
 
+// Take a sharper screenshot when text clarity matters
+{"tool": "capture_window", "args": {"title": "PyCharm", "quality": 75, "sharpen": true}}
+
 // Read that screenshot as Base64 text for non-multimodal models
 {"tool": "read_screenshot_base64", "args": {"file_path": "/tmp/screen.jpg"}}
 

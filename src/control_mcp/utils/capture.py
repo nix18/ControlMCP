@@ -11,7 +11,7 @@ from typing import Any
 
 import mss
 import pyautogui
-from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageStat
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageStat
 
 from control_mcp.schemas.responses import (
     MonitorInfo,
@@ -47,6 +47,12 @@ def _resize_if_needed(img: Image.Image, max_width: int | None) -> tuple[Image.Im
     scale = max_width / img.width
     new_height = int(img.height * scale)
     return img.resize((max_width, new_height), Image.LANCZOS), scale
+
+
+def _sharpen_if_requested(img: Image.Image, sharpen: bool) -> Image.Image:
+    if not sharpen:
+        return img
+    return img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=160, threshold=2))
 
 
 def _capture_region_image(x: int, y: int, width: int, height: int) -> Image.Image:
@@ -252,6 +258,7 @@ def capture_full_screen(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> ScreenshotResult:
     """Capture the full screen (or a specific monitor).
 
@@ -277,6 +284,7 @@ def capture_full_screen(
         img = Image.frombytes("RGB", raw.size, raw.bgra, "raw", "BGRX")
 
         img, _ = _resize_if_needed(img, max_width)
+        img = _sharpen_if_requested(img, sharpen)
 
         filename = make_screenshot_filename(
             prefix="screen",
@@ -312,6 +320,7 @@ def capture_region(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> ScreenshotResult:
     """Capture a rectangular region of the screen.
 
@@ -333,6 +342,7 @@ def capture_region(
 
     img = _capture_region_image(x, y, width, height)
     img, _ = _resize_if_needed(img, max_width)
+    img = _sharpen_if_requested(img, sharpen)
 
     filename = make_screenshot_filename(
         prefix="region",
@@ -366,6 +376,7 @@ def capture_scroll_region(
     save_dir: str | Path | None = None,
     quality: int = 80,
     max_width: int | None = None,
+    sharpen: bool = False,
     settle_time: float = 0.4,
 ) -> ScrollScreenshotResult:
     """Capture a fixed screen region while scrolling inside it, then stitch the results."""
@@ -425,6 +436,7 @@ def capture_scroll_region(
 
     stitched = _compose_vertical([*leading_parts, initial, *trailing_parts])
     stitched, _ = _resize_if_needed(stitched, max_width)
+    stitched = _sharpen_if_requested(stitched, sharpen)
 
     filename = make_screenshot_filename(
         prefix="scroll_region",
@@ -529,6 +541,7 @@ def capture_window(
     max_width: int | None = None,
     grid_rows: int | None = None,
     grid_cols: int | None = None,
+    sharpen: bool = False,
 ) -> WindowScreenshotResult:
     """Capture the first window whose title contains *title* (case-insensitive).
 
@@ -588,6 +601,7 @@ def capture_window(
         img = Image.frombytes("RGB", raw.size, raw.bgra, "raw", "BGRX")
 
         img, _ = _resize_if_needed(img, max_width)
+        img = _sharpen_if_requested(img, sharpen)
 
         filename = make_screenshot_filename(
             prefix="window",

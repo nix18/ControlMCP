@@ -135,6 +135,9 @@ control-mcp
 // 截取屏幕
 {"tool": "capture_screen", "args": {}}
 
+// 文字较小时开启锐化，提高可辨认性
+{"tool": "capture_window", "args": {"title": "PyCharm", "quality": 75, "sharpen": true}}
+
 // 对无多模态读取能力的模型，把截图文件读取为 Base64 文本
 {"tool": "read_screenshot_base64", "args": {"file_path": "/tmp/screen.jpg"}}
 
