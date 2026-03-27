@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ctypes
 import json
+import platform
 import time
 
 import pyautogui
@@ -12,6 +14,21 @@ from control_mcp.schemas.responses import ClickResult, DragResult, MousePosition
 # Disable pyautogui pause/fail-safe for headless use (re-enable if needed)
 pyautogui.PAUSE = 0.01
 pyautogui.FAILSAFE = True
+
+
+def _is_windows() -> bool:
+    return platform.system() == "Windows"
+
+
+def _set_cursor_pos_windows(x: int, y: int) -> bool:
+    if not _is_windows():
+        return False
+    return bool(ctypes.windll.user32.SetCursorPos(x, y))
+
+
+def _current_position() -> tuple[int, int]:
+    pos = pyautogui.position()
+    return pos.x, pos.y
 
 
 def tool_mouse_click(
@@ -121,9 +138,33 @@ def tool_mouse_move(x: int, y: int, duration: float = 0.25) -> str:
     """
     try:
         pyautogui.moveTo(x, y, duration=duration)
-        return MousePosition(x=x, y=y).to_json()
+        actual_x, actual_y = _current_position()
+        if (actual_x, actual_y) != (x, y) and _is_windows():
+            _set_cursor_pos_windows(x, y)
+            actual_x, actual_y = _current_position()
+
+        success = (actual_x, actual_y) == (x, y)
+        message = (
+            f"Moved mouse to ({actual_x}, {actual_y})"
+            if success
+            else f"Requested ({x}, {y}) but cursor is at ({actual_x}, {actual_y})"
+        )
+        return json.dumps(
+            {
+                "success": success,
+                "x": actual_x,
+                "y": actual_y,
+                "target_x": x,
+                "target_y": y,
+                "message": message,
+            },
+            ensure_ascii=False,
+        )
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        return json.dumps(
+            {"success": False, "target_x": x, "target_y": y, "error": str(e)},
+            ensure_ascii=False,
+        )
 
 
 def tool_mouse_position() -> str:

@@ -3,6 +3,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
+import pygetwindow as gw
 import pytest
 
 from control_mcp.tools.window import (
@@ -11,6 +12,7 @@ from control_mcp.tools.window import (
     tool_focus_window,
     tool_list_windows,
 )
+from control_mcp.utils import _win_window
 
 SAMPLE_WINDOWS = [
     {"title": "Notepad", "x": 100, "y": 100, "width": 800, "height": 600},
@@ -74,6 +76,70 @@ class TestToolFocusWindow:
         result = tool_focus_window("missing")
         data = json.loads(result)
         assert data["success"] is False
+
+
+class TestWindowsFocusFallback:
+    @patch("control_mcp.utils._win_window._force_foreground")
+    def test_falls_back_when_activate_does_not_reach_foreground(self, mock_force):
+        window = MagicMock()
+        window.title = "Notepad"
+        window._hWnd = 100
+        window.isMinimized = False
+        mock_force.return_value = True
+
+        with (
+            patch("control_mcp.utils._win_window.gw.getAllWindows", return_value=[window]),
+            patch("control_mcp.utils._win_window._is_foreground", return_value=False),
+        ):
+            assert _win_window.focus_window("Notepad") is True
+
+        mock_force.assert_called_once_with(100)
+
+    @patch("control_mcp.utils._win_window._force_foreground")
+    def test_falls_back_when_activate_raises(self, mock_force):
+        window = MagicMock()
+        window.title = "Notepad"
+        window._hWnd = 200
+        window.isMinimized = True
+        window.activate.side_effect = gw.PyGetWindowException("boom")
+        mock_force.return_value = True
+
+        with patch("control_mcp.utils._win_window.gw.getAllWindows", return_value=[window]):
+            assert _win_window.focus_window("Notepad") is True
+
+        window.restore.assert_called_once()
+        mock_force.assert_called_once_with(200)
+
+
+class TestWindowsFocusSemantics:
+    @patch("control_mcp.utils._win_window.time.sleep")
+    def test_ready_requires_consistently_visible_foreground(self, _mock_sleep):
+        with (
+            patch(
+                "control_mcp.utils._win_window._is_window_presented",
+                side_effect=[True, True, False],
+            ),
+            patch("control_mcp.utils._win_window._is_foreground", side_effect=[True, True, True]),
+        ):
+            assert _win_window._is_ready(123) is False
+
+    @patch("control_mcp.utils._win_window.time.sleep")
+    def test_ready_passes_only_after_all_checks(self, _mock_sleep):
+        attempts = _win_window._READY_CHECK_ATTEMPTS
+        with (
+            patch(
+                "control_mcp.utils._win_window._is_window_presented",
+                side_effect=[True] * attempts,
+            ),
+            patch(
+                "control_mcp.utils._win_window._is_foreground",
+                side_effect=[True] * attempts,
+            ),
+            patch("control_mcp.utils._win_window._USER32.BringWindowToTop") as mock_bring_to_top,
+        ):
+            assert _win_window._is_ready(456) is True
+
+        mock_bring_to_top.assert_called_once_with(456)
 
 
 class TestToolCaptureWindow:

@@ -76,11 +76,57 @@ class TestToolMouseDrag:
 class TestToolMouseMove:
     @patch("control_mcp.tools.mouse.pyautogui")
     def test_success(self, mock_pyauto):
+        pos = MagicMock()
+        pos.x = 960
+        pos.y = 540
+        mock_pyauto.position.return_value = pos
         result = tool_mouse_move(x=960, y=540, duration=0.1)
         data = json.loads(result)
+        assert data["success"] is True
         assert data["x"] == 960
         assert data["y"] == 540
+        assert data["target_x"] == 960
+        assert data["target_y"] == 540
         mock_pyauto.moveTo.assert_called_once()
+
+    @patch("control_mcp.tools.mouse._set_cursor_pos_windows")
+    @patch("control_mcp.tools.mouse._is_windows", return_value=True)
+    @patch("control_mcp.tools.mouse.pyautogui")
+    def test_uses_windows_fallback_when_position_does_not_change(
+        self, mock_pyauto, _mock_is_windows, mock_set_cursor_pos
+    ):
+        first = MagicMock()
+        first.x = 10
+        first.y = 20
+        second = MagicMock()
+        second.x = 100
+        second.y = 120
+        mock_pyauto.position.side_effect = [first, second]
+
+        result = tool_mouse_move(x=100, y=120)
+        data = json.loads(result)
+
+        assert data["success"] is True
+        mock_set_cursor_pos.assert_called_once_with(100, 120)
+
+    @patch("control_mcp.tools.mouse._set_cursor_pos_windows")
+    @patch("control_mcp.tools.mouse._is_windows", return_value=True)
+    @patch("control_mcp.tools.mouse.pyautogui")
+    def test_reports_actual_position_when_move_still_misses(
+        self, mock_pyauto, _mock_is_windows, mock_set_cursor_pos
+    ):
+        pos = MagicMock()
+        pos.x = 5
+        pos.y = 6
+        mock_pyauto.position.side_effect = [pos, pos]
+
+        result = tool_mouse_move(x=100, y=120)
+        data = json.loads(result)
+
+        assert data["success"] is False
+        assert data["x"] == 5
+        assert data["y"] == 6
+        mock_set_cursor_pos.assert_called_once_with(100, 120)
 
     @patch("control_mcp.tools.mouse.pyautogui")
     def test_failure(self, mock_pyauto):
